@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getHeroSlides } from "../../services/heroService";
 import type { HeroSlide } from "../../types/hero";
-
+import { motion, AnimatePresence } from "motion/react";
 function Hero() {
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -53,38 +53,67 @@ function Hero() {
     return (
         <section className="group relative h-screen overflow-hidden">
             {/* Background Image */}
-            <img
-                src={slide.image}
-                alt={slide.title}
-                className="absolute inset-0 h-full w-full object-cover object-[center_60%] transition-all duration-1000 group-hover:scale-105"
-            />
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={slide.id}
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                        duration: 0.8,
+                        ease: "easeInOut",
+                    }}
+                >
+                    {/* Background Image */}
+                    <motion.img
+                        src={slide.image}
+                        alt={slide.title}
+                        className="absolute inset-0 h-full w-full object-cover object-[center_60%]"
+                        initial={{ scale: 1 }}
+                        animate={{ scale: 1.08 }}
+                        transition={{
+                            duration: 6,
+                            ease: "easeInOut",
+                        }}
+                    />
 
-            {/* Dark Overlay */}
-            <div className="absolute inset-0 bg-black/60" />
+                    {/* Dark Overlay */}
+                    <div className="absolute inset-0 bg-black/60" />
 
-            {/* Content */}
-            <div className="relative z-10 flex h-full items-center justify-center px-6">
-                <div className="max-w-4xl text-center text-white">
-                    <p className="mb-4 text-sm uppercase tracking-[0.3em]">
-                        Premium Real Estate
-                    </p>
+                    {/* Content */}
+                    <div className="relative z-10 flex h-full items-center justify-center px-6">
+                        <motion.div
+                            className="max-w-4xl text-center text-white"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.2,
+                            }}
+                        >
+                            <p className="mb-4 text-sm uppercase tracking-[0.3em]">
+                                Premium Real Estate
+                            </p>
 
-                    <h1 className="text-5xl font-light md:text-7xl">
-                        {slide.title}
-                    </h1>
+                            <h1 className="text-5xl font-light md:text-7xl">
+                                {slide.title}
+                            </h1>
 
-                    <p className="mt-6 text-lg leading-relaxed md:text-xl">
-                        {slide.subtitle}
-                    </p>
+                            <p className="mt-6 text-lg leading-relaxed md:text-xl">
+                                {slide.subtitle}
+                            </p>
 
-                    <a
-                        href={slide.button_link}
-                        className="mt-10 inline-block rounded-md border border-white px-8 py-3 text-sm font-medium transition hover:bg-white hover:text-black"
-                    >
-                        {slide.button_text}
-                    </a>
-                </div>
-            </div>
+                            <a
+                                href={slide.button_link}
+                                className="mt-10 inline-block rounded-md border border-white px-8 py-3 text-sm font-medium transition hover:bg-white hover:text-black"
+                            >
+                                {slide.button_text}
+                            </a>
+                        </motion.div>
+                    </div>
+                </motion.div>
+            </AnimatePresence>
 
             {/* Carousel Indicators */}
             {/* Left Arrow */}
@@ -138,8 +167,8 @@ function Hero() {
                         key={index}
                         onClick={() => setCurrentSlide(index)}
                         className={`h-3 w-3 rounded-full transition-all duration-300 ${currentSlide === index
-                                ? "bg-white scale-125"
-                                : "bg-white/40"
+                            ? "bg-white scale-125"
+                            : "bg-white/40"
                             }`}
                     />
                 ))}
