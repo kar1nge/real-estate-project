@@ -10,17 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
+
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-sawbfd!ji7$#7=leguf0e@*b9#9_v*6j3z)p_kgl@96m+k-k9t'
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not configured.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -55,6 +64,7 @@ INSTALLED_APPS = [
     'apps.testimonials',
     'apps.faqs',
     'apps.hero',
+    'apps.contacts',
 ]
 
 MIDDLEWARE = [
@@ -92,13 +102,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'real_estate_db',
-        'USER': 'postgres',
-        'PASSWORD': '@Kar1ng3',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
 
@@ -183,27 +193,40 @@ SPECTACULAR_SETTINGS = {
 # COMPANY INFORMATION
 # ============================================================================
 
-COMPANY_NAME = "Real Estate Company"
-COMPANY_EMAIL = "karingemuniu2@gmail.com"
-COMPANY_PHONE = "+254700000000"
-COMPANY_ADDRESS = "Nairobi, Kenya"
+COMPANY_NAME = os.getenv("COMPANY_NAME")
+COMPANY_EMAIL = os.getenv("COMPANY_EMAIL")
+COMPANY_PHONE = os.getenv("COMPANY_PHONE")
+COMPANY_WHATSAPP = os.getenv("COMPANY_WHATSAPP")
+COMPANY_GOOGLE_MAPS = os.getenv("COMPANY_GOOGLE_MAPS")
+COMPANY_ADDRESS = os.getenv("COMPANY_ADDRESS")
+
+COMPANY_INSTAGRAM = os.getenv("COMPANY_INSTAGRAM")
+COMPANY_FACEBOOK = os.getenv("COMPANY_FACEBOOK")
+COMPANY_TWITTER = os.getenv("COMPANY_TWITTER")
+COMPANY_TIKTOK = os.getenv("COMPANY_TIKTOK")
+COMPANY_YOUTUBE = os.getenv("COMPANY_YOUTUBE")
+
 
 # ============================================================================
 # MARKETING
 # ============================================================================
 
-MARKETING_EMAIL = "karingemuniu2@gmail.com"
+MARKETING_EMAIL = os.getenv("COMPANY_EMAIL")
 
 # ============================================================================
 # EMAIL SETTINGS
 # ============================================================================
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = "karingemuniu@gmail.com"
-EMAIL_HOST_PASSWORD = "rbqy flcq hzsw fdly"
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
 
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    EMAIL_HOST_USER,
+)

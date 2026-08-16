@@ -19,7 +19,7 @@ function Hero() {
             }
         };
 
-        fetchSlides();
+        fetchSlides(); 
     }, []);
 
     useEffect(() => {
@@ -53,7 +53,7 @@ function Hero() {
     return (
         <section className="group relative h-screen overflow-hidden">
             {/* Background Image */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="sync">
                 <motion.div
                     key={slide.id}
                     className="absolute inset-0"
