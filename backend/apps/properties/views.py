@@ -2,6 +2,8 @@ from django_filters.rest_framework import (
     DjangoFilterBackend,
 )
 
+from django.db.models import Count
+
 from rest_framework import (
     generics,
     filters,
@@ -13,6 +15,7 @@ from .models import (
     PropertyType,
     PropertyStatus,
     Amenity,
+    VirtualTour,
 )
 
 from .serializers import (
@@ -21,6 +24,7 @@ from .serializers import (
     PropertyTypeSerializer,
     PropertyStatusSerializer,
     AmenitySerializer,
+    VirtualTourSerializer,
 )
 
 
@@ -81,10 +85,14 @@ class FeaturedPropertyAPIView(generics.ListAPIView):
 
 class LocationListAPIView(generics.ListAPIView):
 
-    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
 
-    serializer_class = (
-        LocationSerializer
+    pagination_class = None
+
+    queryset = (
+        Location.objects
+        .annotate(property_count=Count("properties"))
+        .order_by("-property_count")
     )
 
 
@@ -125,3 +133,11 @@ class AmenityListAPIView(
     serializer_class = (
         AmenitySerializer
     )
+
+class VirtualTourDetailAPIView(generics.RetrieveAPIView):
+
+    queryset = VirtualTour.objects.prefetch_related(
+        "scenes"
+    )
+
+    serializer_class = VirtualTourSerializer

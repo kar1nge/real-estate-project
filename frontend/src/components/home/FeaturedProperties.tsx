@@ -34,7 +34,7 @@ function FeaturedProperties() {
         const fetchProperties = async () => {
             try {
                 const data = await getProperties();
-                setProperties(data);
+                setProperties(data.results);
             } catch (error) {
                 console.error("Error fetching properties:", error);
             } finally {
