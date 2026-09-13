@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Properties from "./pages/Properties";
 import PropertyDetails from "./pages/PropertyDetails";
+import About from "./pages/About";
 
 function App() {
     return (
@@ -12,6 +13,7 @@ function App() {
                 path="/properties/:slug"
                 element={<PropertyDetails />}
             />
+            <Route path="/about" element={<About />} />
         </Routes>
     );
 }
