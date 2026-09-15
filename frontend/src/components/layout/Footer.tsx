@@ -163,7 +163,7 @@ function Footer() {
                             </Link>
 
                             <Link
-                                to="/inquire"
+                                to="/inquiry"
                                 className="transition-colors hover:text-white"
                             >
                                 Inquire
