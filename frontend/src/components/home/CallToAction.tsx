@@ -38,7 +38,7 @@ function CallToAction() {
                         </motion.a>
 
                         <motion.a
-                            href="/inquire"
+                            href="/inquiry"
                             whileHover={{ scale: 1.03 }}
                             whileTap={{ scale: 0.97 }}
                             className="rounded-full border border-white/30 px-[clamp(1.1rem,2vw,1.5rem)] py-[clamp(0.7rem,1vw,0.75rem)] text-[clamp(0.65rem,0.75vw,0.75rem)] font-medium uppercase tracking-[clamp(0.1em,0.2vw,0.15em)] text-white transition-colors hover:bg-white hover:text-black"

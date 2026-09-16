@@ -5,6 +5,7 @@ import PropertyDetails from "./pages/PropertyDetails";
 import About from "./pages/About";
 import FAQs from "./pages/FAQs";
 import Inquiry from "./pages/Inquiry";
+import BookSiteVisit from "./pages/BookSiteVisit";
 import ScrollToTop from "./components/layout/ScrollToTop";
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/inquiry" element={<Inquiry />} />
+                <Route path="/book-site-visit" element={<BookSiteVisit />} />
             </Routes>
         </>
     );

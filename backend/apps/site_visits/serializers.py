@@ -53,11 +53,20 @@ class SiteVisitBookingSerializer(serializers.ModelSerializer):
             "created_at",
         ]
 
-        def validate_schedule(self, value):
+    def validate_schedule(self, value):
 
-            if value.remaining_slots <= 0:
-                raise serializers.ValidationError(
-            "This site visit is fully booked."
+        if value.remaining_slots <= 0:
+            raise serializers.ValidationError(
+                "This site visit is fully booked."
             )
 
-            return value
+        return value
+
+    def validate_number_of_visitors(self, value):
+
+        if value > 3:
+            raise serializers.ValidationError(
+                "A maximum of 3 visitors is allowed per booking."
+            )
+
+        return value

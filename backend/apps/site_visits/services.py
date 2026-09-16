@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.mail import send_mail
 
 
-
 def send_site_visit_notification(booking):
 
     schedule = booking.schedule
@@ -67,6 +66,7 @@ Dear {booking.visitor_name},
 
 Thank you for your interest in {settings.COMPANY_NAME}.
 We have received your site visit request for:
+
 Property:
 {schedule.real_estate_property.title}
 
@@ -91,52 +91,6 @@ Phone:
 {settings.COMPANY_PHONE}
 
 {settings.COMPANY_ADDRESS}
-"""
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[booking.visitor_email],
-        fail_silently=False,
-    )
-
-
-def send_visit_confirmed_email(booking):
-
-    schedule = booking.schedule
-
-    send_mail(
-        subject=(
-            f"Your Site Visit Has Been Confirmed | "
-            f"{settings.COMPANY_NAME}"
-        ),
-        message=(
-            f"""
-Dear {booking.visitor_name},
-
-Your site visit has been confirmed.
-
-Property:
-{schedule.real_estate_property.title}
-
-Date:
-{schedule.date}
-
-Time:
-{schedule.start_time} - {schedule.end_time}
-
-Location:
-{schedule.real_estate_property.google_maps_url}
-
-We look forward to welcoming you.
-
-Kind Regards,
-
-{settings.COMPANY_NAME}
-
-Email:
-{settings.COMPANY_EMAIL}
-
-Phone:
-{settings.COMPANY_PHONE}
 """
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
