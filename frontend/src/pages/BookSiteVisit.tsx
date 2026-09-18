@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
+import { useLocation } from "react-router-dom";
 
 import {
   createSiteVisitBooking,
@@ -25,12 +26,26 @@ function BookSiteVisit() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  const location = useLocation();
+
+  const {
+    visitorName,
+    visitorEmail,
+    visitorPhone,
+    visitorMessage,
+  }: {
+    visitorName?: string;
+    visitorEmail?: string;
+    visitorPhone?: string;
+    visitorMessage?: string;
+  } = location.state || {};
+
   const [formData, setFormData] = useState({
-    visitor_name: "",
-    visitor_email: "",
-    visitor_phone: "",
+    visitor_name: visitorName || "",
+    visitor_email: visitorEmail || "",
+    visitor_phone: visitorPhone || "",
     number_of_visitors: 1,
-    message: "",
+    message: visitorMessage || "",
   });
 
   useEffect(() => {
@@ -106,7 +121,6 @@ function BookSiteVisit() {
       setSubmitting(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-[#2C2C2C]">
       <Navbar />
