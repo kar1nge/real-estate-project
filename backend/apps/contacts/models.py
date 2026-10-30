@@ -20,8 +20,8 @@ class ContactSettings(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Contact Settings"
-        verbose_name_plural = "Contact Settings"
+        verbose_name = "Company Settings"
+        verbose_name_plural = "Company Settings"
 
     def __str__(self):
         return self.name

@@ -55,6 +55,11 @@ class SiteVisitBookingSerializer(serializers.ModelSerializer):
 
     def validate_schedule(self, value):
 
+        if not value.active:
+            raise serializers.ValidationError(
+                "This site visit is no longer available for booking."
+            )
+
         if value.remaining_slots <= 0:
             raise serializers.ValidationError(
                 "This site visit is fully booked."

@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { Property } from "../types/property";
+import { API_BASE_URL } from "./apiConfig";
 
-const API_URL = "http://127.0.0.1:8000/api/properties/";
+const API_URL = `${API_BASE_URL}properties/`;
 
 export interface PaginatedProperties {
     count: number;
@@ -117,6 +118,11 @@ export async function getProperties(
     );
 
     return response.data;
+}
+
+export async function getFeaturedProperties(): Promise<Property[]> {
+    const response = await axios.get<PaginatedProperties>(`${API_URL}featured/`);
+    return response.data.results;
 }
 
 

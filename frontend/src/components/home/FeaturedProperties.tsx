@@ -1,40 +1,59 @@
 import { motion } from "motion/react";
 import PropertyCard from "../properties";
 import { useEffect, useState } from "react";
-import { getProperties } from "../../services/propertyService";
+import { getProperties, getFeaturedProperties } from "../../services/propertyService";
 import type { Property } from "../../types/property";
 
 function FeaturedProperties() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // I'll drop the hardcoded properties once the CMS is ready and connected
-    // to the frontend. For now, this is a temporary solution to showcase
-    // the properties on the homepage.
-    const homepageProperties = [
-        "skyline-residence",
-        "horizon-penthouse",
-        "emerald-heights",
-        "the-oak-residences",
-        "willow-gardens",
-        "aurora-suites",
-        "serenity-villas",
-        "one-riverside-sky",
-        "komo",
-    ]
-        .map((slug) => properties.find((property) => property.slug === slug))
-        .filter((property): property is Property => property !== undefined);
+    const publishedProperties = [...properties]
+        .filter((property) => property.publication_status === "published")
+        .sort((a, b) => {
+            const orderA = a.homepage_order ?? Number.MAX_SAFE_INTEGER;
+            const orderB = b.homepage_order ?? Number.MAX_SAFE_INTEGER;
+            return orderA - orderB || a.title.localeCompare(b.title);
+        });
+    const featuredProperties = publishedProperties.filter((property) => property.featured);
+    const homepageProperties = (featuredProperties.length > 0
+        ? featuredProperties
+        : publishedProperties
+    ).slice(0, 9);
 
-    console.log(
-        "Homepage properties:",
-        homepageProperties.map((property) => property.title)
-    );
+    const cardLayouts = [
+        { className: "h-[clamp(24rem,45vw,30rem)] md:col-span-2 lg:col-span-12 lg:h-[clamp(26rem,34vw,30rem)]", variant: "showcase" as const, priority: true },
+        { className: "h-[clamp(22rem,42vw,26rem)] md:col-span-1 lg:col-span-4 lg:h-[clamp(15rem,19vw,16.25rem)]", variant: "featured" as const },
+        { className: "h-[clamp(22rem,42vw,26rem)] md:col-span-1 lg:col-span-8 lg:h-[clamp(15rem,19vw,16.25rem)]", variant: "featured" as const },
+        { className: "h-[clamp(23rem,44vw,28rem)] md:col-span-1 lg:col-span-8 lg:h-[clamp(17rem,22vw,18.75rem)]", variant: "featured" as const },
+        { className: "h-[clamp(23rem,44vw,28rem)] md:col-span-1 lg:col-span-4 lg:h-[clamp(17rem,22vw,18.75rem)]", variant: "compact" as const },
+        { className: "h-[clamp(24rem,46vw,30rem)] md:col-span-1 lg:col-span-9 lg:h-[clamp(19rem,25vw,21.25rem)]", variant: "featured" as const },
+        { className: "h-[clamp(24rem,46vw,30rem)] md:col-span-1 lg:col-span-3 lg:h-[clamp(19rem,25vw,21.25rem)]", variant: "compact" as const },
+        { className: "h-[clamp(22rem,42vw,26rem)] md:col-span-1 lg:col-span-4 lg:h-[clamp(16rem,20vw,17.5rem)]", variant: "compact" as const },
+        { className: "h-[clamp(22rem,42vw,26rem)] md:col-span-1 lg:col-span-8 lg:h-[clamp(16rem,20vw,17.5rem)]", variant: "featured" as const },
+    ];
 
     useEffect(() => {
         const fetchProperties = async () => {
             try {
-                const data = await getProperties();
-                setProperties(data.results);
+                const [featured, allProperties] = await Promise.all([
+                    getFeaturedProperties(),
+                    getProperties(),
+                ]);
+                const publishedFeatured = featured
+                    .filter((property) => property.publication_status === "published")
+                    .sort((a, b) => {
+                        const orderA = a.homepage_order ?? Number.MAX_SAFE_INTEGER;
+                        const orderB = b.homepage_order ?? Number.MAX_SAFE_INTEGER;
+                        return orderA - orderB || a.title.localeCompare(b.title);
+                    });
+                setProperties(
+                    publishedFeatured.length > 0
+                        ? publishedFeatured
+                        : allProperties.results.filter(
+                              (property) => property.publication_status === "published"
+                          )
+                );
             } catch (error) {
                 console.error("Error fetching properties:", error);
             } finally {
@@ -53,7 +72,7 @@ function FeaturedProperties() {
         );
     }
 
-    if (homepageProperties.length < 9) {
+    if (homepageProperties.length === 0) {
         return (
             <section className="flex min-h-[clamp(16rem,30vw,24rem)] items-center justify-center px-[clamp(1rem,4vw,2.5rem)] text-center">
                 Featured properties are being prepared.
@@ -86,253 +105,25 @@ function FeaturedProperties() {
 
                 {/* Gallery */}
                 <div className="grid grid-cols-1 gap-[clamp(1rem,1.5vw,1.5rem)] md:grid-cols-2 lg:grid-cols-12">
-
-                    {/* Card 1 */}
-                    <motion.div
-                        className="h-[clamp(24rem,45vw,30rem)] md:col-span-2 lg:col-span-12 lg:h-[clamp(26rem,34vw,30rem)]"
-                        initial={{
-                            opacity: 0,
-                            y: 25,
-                            scale: 0.98,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                            y: 0,
-                            scale: 1,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.3,
-                        }}
-                        transition={{
-                            duration: 0.8,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[0]}
-                            variant="showcase"
-                            priority
-                        />
-                    </motion.div>
-
-                    {/* Card 2 */}
-                    <motion.div
-                        className="h-[clamp(22rem,42vw,26rem)] md:col-span-1 lg:col-span-4 lg:h-[clamp(15rem,19vw,16.25rem)]"
-                        initial={{
-                            opacity: 0,
-                            x: -40,
-                            y: 20,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                            x: 0,
-                            y: 0,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.6,
-                        }}
-                        transition={{
-                            duration: 0.5,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[1]}
-                            variant="featured"
-                        />
-                    </motion.div>
-
-                    {/* Card 3 */}
-                    <motion.div
-                        className="h-[clamp(22rem,42vw,26rem)] md:col-span-1 lg:col-span-8 lg:h-[clamp(15rem,19vw,16.25rem)]"
-                        initial={{
-                            opacity: 0,
-                            x: 40,
-                            y: 20,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                            x: 0,
-                            y: 0,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.6,
-                        }}
-                        transition={{
-                            duration: 0.7,
-                            delay: 0.65,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[2]}
-                            variant="featured"
-                        />
-                    </motion.div>
-
-                    {/* Card 4 */}
-                    <motion.div
-                        className="h-[clamp(23rem,44vw,28rem)] md:col-span-1 lg:col-span-8 lg:h-[clamp(17rem,22vw,18.75rem)]"
-                        initial={{
-                            opacity: 0,
-                            scale: 0.98,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                            scale: 1,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.55,
-                        }}
-                        transition={{
-                            duration: 1,
-                            delay: 0.2,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[3]}
-                            variant="featured"
-                        />
-                    </motion.div>
-
-                    {/* Card 5 */}
-                    <motion.div
-                        className="h-[clamp(23rem,44vw,28rem)] md:col-span-1 lg:col-span-4 lg:h-[clamp(17rem,22vw,18.75rem)]"
-                        initial={{
-                            opacity: 0,
-                            scale: 0.98,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                            scale: 1,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.6,
-                        }}
-                        transition={{
-                            duration: 1,
-                            delay: 0.5,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[4]}
-                            variant="compact"
-                        />
-                    </motion.div>
-
-                    {/* Card 6 */}
-                    <motion.div
-                        className="h-[clamp(24rem,46vw,30rem)] md:col-span-1 lg:col-span-9 lg:h-[clamp(19rem,25vw,21.25rem)]"
-                        initial={{
-                            opacity: 0,
-                            scale: 0.98,
-                            x: -18,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                            scale: 1,
-                            x: 0,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.55,
-                        }}
-                        transition={{
-                            duration: 1,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[5]}
-                            variant="featured"
-                        />
-                    </motion.div>
-
-                    {/* Card 7 */}
-                    <motion.div
-                        className="h-[clamp(24rem,46vw,30rem)] md:col-span-1 lg:col-span-3 lg:h-[clamp(19rem,25vw,21.25rem)]"
-                        initial={{
-                            opacity: 0,
-                            scale: 0.98,
-                            x: 18,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                            scale: 1,
-                            x: 0,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.55,
-                        }}
-                        transition={{
-                            duration: 1,
-                            delay: 0.18,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[6]}
-                            variant="compact"
-                        />
-                    </motion.div>
-
-                    {/* Card 8 */}
-                    <motion.div
-                        className="h-[clamp(22rem,42vw,26rem)] md:col-span-1 lg:col-span-4 lg:h-[clamp(16rem,20vw,17.5rem)]"
-                        initial={{
-                            opacity: 0.2,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.6,
-                        }}
-                        transition={{
-                            duration: 0.8,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[7]}
-                            variant="compact"
-                        />
-                    </motion.div>
-
-                    {/* Card 9 */}
-                    <motion.div
-                        className="h-[clamp(22rem,42vw,26rem)] md:col-span-1 lg:col-span-8 lg:h-[clamp(16rem,20vw,17.5rem)]"
-                        initial={{
-                            opacity: 0.2,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                        }}
-                        viewport={{
-                            once: true,
-                            amount: 0.6,
-                        }}
-                        transition={{
-                            duration: 0.8,
-                            delay: 0.15,
-                            ease: "easeOut",
-                        }}
-                    >
-                        <PropertyCard
-                            property={homepageProperties[8]}
-                            variant="featured"
-                        />
-                    </motion.div>
-
+                    {homepageProperties.map((property, index) => {
+                        const layout = cardLayouts[index];
+                        return (
+                            <motion.div
+                                key={property.id}
+                                className={layout.className}
+                                initial={{ opacity: 0, y: 24, scale: 0.98 }}
+                                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                                viewport={{ once: true, amount: 0.25 }}
+                                transition={{ duration: 0.7, delay: index * 0.08, ease: "easeOut" }}
+                            >
+                                <PropertyCard
+                                    property={property}
+                                    variant={layout.variant}
+                                    priority={layout.priority}
+                                />
+                            </motion.div>
+                        );
+                    })}
                 </div>
 
                 {/* Closing CTA */}

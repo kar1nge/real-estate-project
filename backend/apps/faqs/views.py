@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.permissions import IsAdminUser
 
 from .models import FAQ
 from .serializers import FAQSerializer
@@ -40,3 +41,14 @@ class FAQDetailAPIView(
     )
 
     serializer_class = FAQSerializer
+
+class FAQManagementListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = FAQSerializer
+    permission_classes = [IsAdminUser]
+    queryset = FAQ.objects.all()
+
+
+class FAQManagementDetailAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = FAQSerializer
+    permission_classes = [IsAdminUser]
+    queryset = FAQ.objects.all()

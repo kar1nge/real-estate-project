@@ -30,6 +30,7 @@ export interface PropertyImage {
     alt_text: string;
     display_order: number;
     property: number;
+    is_active: boolean;
 }
 
 export interface SimilarProperty {
@@ -93,6 +94,8 @@ export interface Property {
     bathrooms: number;
 
     featured: boolean;
+    homepage_order: number | null;
+    publication_status: "draft" | "published";
 
     google_maps_url: string | null;
 
@@ -119,11 +122,21 @@ export interface Property {
     similar_properties: Property[];
 }
 
+export interface TourHotspot {
+    id: number;
+    label: string;
+    yaw: number;
+    pitch: number;
+    target_scene: number;
+    target_scene_name: string;
+}
+
 export interface TourScene {
     id: number;
     name: string;
     image: string;
     display_order: number;
+    hotspots: TourHotspot[];
 }
 
 export interface VirtualTour {

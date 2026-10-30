@@ -4,9 +4,13 @@ from .views import (
     FAQListAPIView,
     FeaturedFAQAPIView,
     FAQDetailAPIView,
+    FAQManagementListCreateAPIView,
+    FAQManagementDetailAPIView,
 )
 
 urlpatterns = [
+    path("manage/", FAQManagementListCreateAPIView.as_view(), name="faq-manage"),
+    path("manage/<int:pk>/", FAQManagementDetailAPIView.as_view(), name="faq-manage-detail"),
     path(
         "",
         FAQListAPIView.as_view(),

@@ -1,13 +1,23 @@
 import { motion } from "motion/react";
 import aboutImage from "../assets/images/about-us.jfif";
 import TeamSection from "../components/about/TeamSection";
-import { useEffect } from "react";
+import EditablePageCopy from "../components/EditablePageCopy";
+import { useEffect, useState } from "react";
+import { getStatistics, type Statistic } from "../services/statisticsService";
+import { AnimatedNumber } from "../components/home/Statistics";
 import { useLocation } from "react-router-dom";
 import Footer from "../components/layout/Footer";
 import Navbar from "../components/layout/Navbar";
 
 function About() {
     const location = useLocation();
+    const [statistics, setStatistics] = useState<Statistic[]>([]);
+
+    useEffect(() => {
+        getStatistics().then(setStatistics).catch((error) => {
+            console.error("Failed to load About page statistics:", error);
+        });
+    }, []);
 
     useEffect(() => {
         if (location.hash === "#team") {
@@ -401,24 +411,7 @@ function About() {
 
           {/* Statistics */}
           <div className="mt-[clamp(4rem,8vw,6rem)] grid grid-cols-2 border-t border-gray-200 md:grid-cols-4">
-            {[
-              {
-                number: "00+",
-                label: "Properties Represented",
-              },
-              {
-                number: "00+",
-                label: "Clients Served",
-              },
-              {
-                number: "00+",
-                label: "Years of Experience",
-              },
-              {
-                number: "00%",
-                label: "Client Satisfaction",
-              },
-            ].map((item, index) => (
+            {statistics.map((item, index) => (
               <motion.div
                 key={item.label}
                 initial={{
@@ -457,22 +450,9 @@ function About() {
               >
                 {/* Number */}
                 <div className="relative overflow-hidden">
-                  <motion.p
-                    initial={{ y: "100%" }}
-                    whileInView={{ y: 0 }}
-                    viewport={{
-                      once: true,
-                      amount: 0.35,
-                    }}
-                    transition={{
-                      duration: 0.8,
-                      delay: index * 0.15 + 0.15,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    className="text-[clamp(3rem,6vw,5.75rem)] font-light leading-none tracking-[-0.05em] text-gray-900"
-                  >
-                    {item.number}
-                  </motion.p>
+                  <p className="text-[clamp(3rem,6vw,5.75rem)] font-light leading-none tracking-[-0.05em] text-gray-900">
+                    <AnimatedNumber value={item.value} suffix={item.suffix} />
+                  </p>
                 </div>
 
                 {/* Label */}
@@ -500,6 +480,8 @@ function About() {
           </div>
         </div>
       </section>
+
+      <EditablePageCopy slug="about" />
 
       <TeamSection />
 

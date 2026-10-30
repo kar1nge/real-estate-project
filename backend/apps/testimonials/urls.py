@@ -4,9 +4,13 @@ from .views import (
     TestimonialListAPIView,
     FeaturedTestimonialAPIView,
     TestimonialDetailAPIView,
+    TestimonialManagementListCreateAPIView,
+    TestimonialManagementDetailAPIView,
 )
 
 urlpatterns = [
+    path("manage/", TestimonialManagementListCreateAPIView.as_view(), name="testimonial-manage"),
+    path("manage/<int:pk>/", TestimonialManagementDetailAPIView.as_view(), name="testimonial-manage-detail"),
     path(
         "",
         TestimonialListAPIView.as_view(),

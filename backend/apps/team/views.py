@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.permissions import IsAdminUser
 
 from .models import TeamMember
 from .serializers import TeamMemberSerializer
@@ -33,3 +34,15 @@ class TeamMemberDetailAPIView(
     serializer_class = (
         TeamMemberSerializer
     )
+
+
+class TeamMemberManagementListAPIView(generics.ListCreateAPIView):
+    serializer_class = TeamMemberSerializer
+    permission_classes = [IsAdminUser]
+    queryset = TeamMember.objects.all().order_by("display_order", "name")
+
+
+class TeamMemberManagementDetailAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = TeamMemberSerializer
+    permission_classes = [IsAdminUser]
+    queryset = TeamMember.objects.all()

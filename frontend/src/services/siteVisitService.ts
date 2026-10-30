@@ -1,10 +1,11 @@
 import axios from "axios";
+import { API_BASE_URL } from "./apiConfig";
 import type {
     SiteVisitSchedule,
     CreateSiteVisitBookingData,
 } from "../types/siteVisit";
 
-const API_URL = "http://127.0.0.1:8000/api/site-visits/";
+const API_URL = `${API_BASE_URL}site-visits/`;
 
 export async function getSiteVisitSchedules(): Promise<SiteVisitSchedule[]> {
     const response = await axios.get<{

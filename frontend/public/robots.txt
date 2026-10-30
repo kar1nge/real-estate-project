@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /manage
+Disallow: /activate/
+Disallow: /api/
+Disallow: /admin/
