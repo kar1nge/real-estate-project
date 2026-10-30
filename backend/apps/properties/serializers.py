@@ -55,6 +55,7 @@ class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertyImage
         fields = "__all__"
+        read_only_fields = ("property",)
 
 
 class SimilarPropertySerializer(serializers.ModelSerializer):
@@ -110,6 +111,27 @@ class TourHotspotSerializer(serializers.ModelSerializer):
             "target_scene",
             "target_scene_name",
         ]
+
+    def validate(self, attrs):
+        target_scene = attrs.get(
+            "target_scene",
+            getattr(self.instance, "target_scene", None),
+        )
+        source_scene = getattr(self.instance, "scene", None)
+        if source_scene is None:
+            view = self.context.get("view")
+            scene_id = getattr(view, "kwargs", {}).get("scene_id")
+            source_scene = TourScene.objects.filter(pk=scene_id).first()
+
+        if (
+            target_scene is not None
+            and source_scene is not None
+            and target_scene.virtual_tour_id != source_scene.virtual_tour_id
+        ):
+            raise serializers.ValidationError({
+                "target_scene": "Choose a scene from the same virtual tour."
+            })
+        return attrs
 class TourSceneSerializer(serializers.ModelSerializer):
     hotspots = TourHotspotSerializer(
         many=True,
@@ -125,6 +147,13 @@ class TourSceneSerializer(serializers.ModelSerializer):
             "display_order",
             "hotspots",
         ]
+
+
+class TourSceneManagementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourScene
+        fields = ["id", "name", "image", "display_order"]
+        read_only_fields = ["id"]
 
 
 class VirtualTourSerializer(serializers.ModelSerializer):
@@ -171,3 +200,63 @@ class PropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
         fields = "__all__"
+
+
+class PropertyListSerializer(PropertySerializer):
+    """Keep collection responses small; full galleries and tours load on detail pages."""
+
+    images = PropertyImageSerializer(
+        source="listing_images",
+        many=True,
+        read_only=True,
+    )
+    virtual_tour = serializers.SerializerMethodField()
+    similar_properties = serializers.SerializerMethodField()
+
+    def get_virtual_tour(self, obj):
+        return None
+
+    def get_similar_properties(self, obj):
+        return []
+
+
+class PropertyManagementSerializer(serializers.ModelSerializer):
+    images = PropertyImageSerializer(
+        many=True,
+        read_only=True,
+    )
+    virtual_tour = VirtualTourSerializer(read_only=True)
+
+    class Meta:
+        model = Property
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "short_description",
+            "description",
+            "property_type",
+            "status",
+            "starting_price",
+            "bedrooms",
+            "bathrooms",
+            "location",
+            "google_maps_url",
+            "featured",
+            "homepage_order",
+            "publication_status",
+            "amenities",
+            "images",
+            "virtual_tour",
+            "youtube_url",
+            "similar_properties",
+            "completion_date",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "slug",
+            "created_at",
+            "updated_at",
+        ]

@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.permissions import IsAdminUser
 
 from .models import Testimonial
 from .serializers import (
@@ -64,3 +65,14 @@ class TestimonialDetailAPIView(
     serializer_class = (
         TestimonialSerializer
     )
+
+class TestimonialManagementListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = TestimonialSerializer
+    permission_classes = [IsAdminUser]
+    queryset = Testimonial.objects.all()
+
+
+class TestimonialManagementDetailAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = TestimonialSerializer
+    permission_classes = [IsAdminUser]
+    queryset = Testimonial.objects.all()

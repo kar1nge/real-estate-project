@@ -1,8 +1,12 @@
 from django.conf import settings
 from django.core.mail import send_mail
 
+from apps.contacts.services import get_company_settings
+
 
 def send_inquiry_notification(inquiry):
+
+    company = get_company_settings()
 
     send_mail(
         subject=(
@@ -13,11 +17,10 @@ def send_inquiry_notification(inquiry):
             f"""
 Dear Marketing Team,
 
-A new inquiry has been submitted through the {settings.COMPANY_NAME} website.
+A new inquiry has been submitted through the {company.name} website.
 
 Inquiry Details
 --------------------------------------------------
-
 Name:
 {inquiry.name}
 
@@ -36,10 +39,9 @@ Subject:
 Message:
 {inquiry.message}
 
-
 Kind Regards,
 
-{settings.COMPANY_NAME}
+{company.name}
 Automated Notification System
 """
         ),
@@ -51,20 +53,21 @@ Automated Notification System
 
 def send_inquiry_response_email(inquiry):
 
+    company = get_company_settings()
+
     send_mail(
         subject=(
             f"Response to Your Inquiry | "
-            f"{settings.COMPANY_NAME}"
+            f"{company.name}"
         ),
         message=(
             f"""
 Dear {inquiry.name},
 
-Thank you for contacting {settings.COMPANY_NAME}.
+Thank you for contacting {company.name}.
 
 Your Inquiry
 --------------------------------------------------
-
 Subject:
 {inquiry.subject}
 
@@ -74,26 +77,23 @@ Property:
 Message:
 {inquiry.message}
 
-
 Our Response
 --------------------------------------------------
-
 {inquiry.response}
-
 
 If you have any additional questions, please feel free to contact us.
 
 Kind Regards,
 
-{settings.COMPANY_NAME}
+{company.name}
 
 Email:
-{settings.COMPANY_EMAIL}
+{company.email}
 
 Phone:
-{settings.COMPANY_PHONE}
+{company.phone}
 
-{settings.COMPANY_ADDRESS}
+{company.address}
 """
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,

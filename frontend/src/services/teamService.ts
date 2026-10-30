@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { TeamMember } from "../types/team";
+import { API_BASE_URL } from "./apiConfig";
 
-const API_URL = "http://127.0.0.1:8000/api/team/";
+const API_URL = `${API_BASE_URL}team/`;
 
 interface PaginatedTeamMembers {
     count: number;

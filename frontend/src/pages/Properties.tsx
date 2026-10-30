@@ -196,7 +196,8 @@ const currentLocationPage =
     const activeFilterCount = Object.keys(activeFilters).length;
     const hasActiveFilters = activeFilterCount > 0;
 
-    const pageSize = 12;
+    // Keep this aligned with Django REST Framework's configured page size.
+    const pageSize = 9;
 
     const totalPages = Math.ceil(
         totalProperties / pageSize

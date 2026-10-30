@@ -13,7 +13,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlparse
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,10 +33,28 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY is not configured.")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Set DJANGO_ENV=production in the hosting environment. Development defaults
+# preserve the local workflow; production fails closed without an allowed-host list.
+DJANGO_ENV = os.getenv("DJANGO_ENV", "development").lower()
+DEBUG_DEFAULT = "true" if DJANGO_ENV == "development" else "false"
+DEBUG = os.getenv("DJANGO_DEBUG", DEBUG_DEFAULT).lower() in {"1", "true", "yes"}
+if DJANGO_ENV == "production" and DEBUG:
+    raise ImproperlyConfigured("DJANGO_DEBUG must be false when DJANGO_ENV=production.")
 
-ALLOWED_HOSTS = []
+configured_hosts = os.getenv("DJANGO_ALLOWED_HOSTS", "")
+ALLOWED_HOSTS = [host.strip() for host in configured_hosts.split(",") if host.strip()]
+railway_public_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "").strip()
+if railway_public_domain:
+    ALLOWED_HOSTS.append(railway_public_domain)
+render_external_hostname = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if render_external_hostname:
+    ALLOWED_HOSTS.append(render_external_hostname)
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
+if not DEBUG and not ALLOWED_HOSTS:
+    raise ImproperlyConfigured(
+        "Set DJANGO_ALLOWED_HOSTS to the production hostnames before starting Django."
+    )
 
 
 # Application definition
@@ -65,11 +85,15 @@ INSTALLED_APPS = [
     'apps.faqs',
     'apps.hero',
     'apps.contacts',
+    'apps.site_statistics',
+    'apps.site_content',
+    'apps.cms_accounts',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -101,16 +125,38 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
+database_url = os.getenv("DATABASE_URL", "").strip()
+if database_url:
+    parsed_database_url = urlparse(database_url)
+    if parsed_database_url.scheme not in {"postgres", "postgresql"}:
+        raise ImproperlyConfigured("DATABASE_URL must point to a PostgreSQL database.")
+    database_options = {
+        key: values[-1]
+        for key, values in parse_qs(parsed_database_url.query).items()
+        if values
     }
-}
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": unquote(parsed_database_url.path.lstrip("/")),
+            "USER": unquote(parsed_database_url.username or ""),
+            "PASSWORD": unquote(parsed_database_url.password or ""),
+            "HOST": parsed_database_url.hostname or "",
+            "PORT": parsed_database_url.port or "5432",
+            "OPTIONS": database_options,
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME") or os.getenv("PGDATABASE"),
+            "USER": os.getenv("DB_USER") or os.getenv("PGUSER"),
+            "PASSWORD": os.getenv("DB_PASSWORD") or os.getenv("PGPASSWORD"),
+            "HOST": os.getenv("DB_HOST") or os.getenv("PGHOST"),
+            "PORT": os.getenv("DB_PORT") or os.getenv("PGPORT", "5432"),
+        }
+    }
 
 
 # Password validation
@@ -147,17 +193,134 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+FRONTEND_DIST_DIR = BASE_DIR.parent / "frontend_dist"
+if FRONTEND_DIST_DIR.is_dir():
+    STATICFILES_DIRS = [FRONTEND_DIST_DIR]
 
 MEDIA_URL = "/media/"
 
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = Path(os.getenv("DJANGO_MEDIA_ROOT", str(BASE_DIR / "media"))).expanduser()
+
+# Shared, database-backed cache keeps DRF throttling consistent across Django
+# worker processes. The matching cache table is created by the cms_accounts
+# migration.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "cms_cache",
+        "TIMEOUT": 300,
+    }
+}
+
+MEDIA_STORAGE_BACKEND = os.getenv(
+    "DJANGO_MEDIA_STORAGE", "local" if DEBUG else "render_disk"
+).strip().lower()
+if MEDIA_STORAGE_BACKEND == "render_disk":
+    if not DEBUG:
+        render_media_root = Path("/var/data").resolve()
+        configured_media_root = MEDIA_ROOT.resolve()
+        if not os.getenv("DJANGO_MEDIA_ROOT") or not configured_media_root.is_relative_to(
+            render_media_root
+        ):
+            raise ImproperlyConfigured(
+                "Render production media must be stored under its persistent disk; "
+                "set DJANGO_MEDIA_ROOT to a path under /var/data."
+            )
+elif MEDIA_STORAGE_BACKEND == "railway_bucket":
+    required_bucket_settings = (
+        "AWS_STORAGE_BUCKET_NAME",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_S3_ENDPOINT_URL",
+    )
+    missing_bucket_settings = [
+        name for name in required_bucket_settings if not os.getenv(name)
+    ]
+    if missing_bucket_settings:
+        raise ImproperlyConfigured(
+            "Railway bucket storage requires: " + ", ".join(missing_bucket_settings)
+        )
+elif MEDIA_STORAGE_BACKEND == "local":
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            "Production media must use durable storage; configure the Render "
+            "persistent disk or set DJANGO_MEDIA_STORAGE=railway_bucket with "
+            "its credentials."
+        )
+else:
+    raise ImproperlyConfigured(
+        "DJANGO_MEDIA_STORAGE must be 'local', 'render_disk', or 'railway_bucket'."
+    )
+
+# Uploaded ImageField media is compressed before storage. Production defaults
+# to Render's mounted persistent disk; Railway's S3-compatible bucket remains
+# available when explicitly selected.
+STORAGES = {
+    "default": {
+        "BACKEND": (
+            "config.s3_storage.CompressedS3ImageStorage"
+            if MEDIA_STORAGE_BACKEND == "railway_bucket"
+            else "config.storage.CompressedImageStorage"
+        ),
+        "OPTIONS": {
+            "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME", ""),
+            "endpoint_url": os.getenv("AWS_S3_ENDPOINT_URL", ""),
+            "region_name": os.getenv("AWS_DEFAULT_REGION", "auto"),
+            "addressing_style": os.getenv("AWS_S3_ADDRESSING_STYLE", "virtual"),
+            "signature_version": "s3v4",
+            "querystring_auth": True,
+            "querystring_expire": int(os.getenv("AWS_QUERYSTRING_EXPIRE", "604800")),
+            "default_acl": None,
+            "file_overwrite": False,
+        } if MEDIA_STORAGE_BACKEND == "railway_bucket" else {},
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    origin.strip()
+    for origin in os.getenv(
+        "DJANGO_CORS_ALLOWED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173" if DEBUG else "",
+    ).split(",")
+    if origin.strip()
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "DJANGO_CSRF_TRUSTED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173" if DEBUG else "",
+    ).split(",")
+    if origin.strip()
+]
+if render_external_hostname:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{render_external_hostname}")
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = (
+        os.getenv("DJANGO_HSTS_INCLUDE_SUBDOMAINS", "false").lower()
+        in {"1", "true", "yes"}
+    )
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
@@ -167,7 +330,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS":
         "rest_framework.pagination.PageNumberPagination",
 
-    "PAGE_SIZE": 12,
+    "PAGE_SIZE": 9,
+
+    "DEFAULT_THROTTLE_RATES": {
+        "inquiry_creation": os.getenv("INQUIRY_THROTTLE_RATE", "10/hour"),
+        "site_visit_booking": os.getenv("SITE_VISIT_THROTTLE_RATE", "10/hour"),
+        "cms_login": os.getenv("CMS_LOGIN_THROTTLE_RATE", "5/minute"),
+    },
 
     "DEFAULT_SCHEMA_CLASS":
         "drf_spectacular.openapi.AutoSchema",
@@ -217,7 +386,9 @@ MARKETING_EMAIL = os.getenv("COMPANY_EMAIL")
 # EMAIL SETTINGS
 # ============================================================================
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+)
 
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))

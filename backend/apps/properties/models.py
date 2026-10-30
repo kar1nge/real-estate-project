@@ -3,43 +3,27 @@ from django.utils.text import slugify
 
 
 class Location(models.Model):
-    name = models.CharField(
-        max_length=100,
-        unique=True,
-    )
-
-    slug = models.SlugField(
-        unique=True,
-        blank=True,
-    )
-
-    description = models.TextField(
-        blank=True,
-    )
-
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True, blank=True)
+    description = models.TextField(blank=True)
     hero_image = models.ImageField(
         upload_to="locations/",
         blank=True,
         null=True,
     )
-
     latitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         blank=True,
         null=True,
     )
-
     longitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         blank=True,
         null=True,
     )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -93,10 +77,7 @@ class Amenity(models.Model):
 
 
 class Property(models.Model):
-    title = models.CharField(
-        max_length=255,
-    )
-
+    title = models.CharField(max_length=255)
     slug = models.SlugField(
         unique=True,
         blank=True,
@@ -105,7 +86,6 @@ class Property(models.Model):
     short_description = models.CharField(
         max_length=255,
     )
-
     description = models.TextField()
 
     property_type = models.ForeignKey(
@@ -126,7 +106,6 @@ class Property(models.Model):
     )
 
     bedrooms = models.PositiveIntegerField()
-
     bathrooms = models.PositiveIntegerField()
 
     location = models.ForeignKey(
@@ -145,13 +124,25 @@ class Property(models.Model):
         default=False,
     )
 
+    homepage_order = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+
+    publication_status = models.CharField(
+        max_length=20,
+        choices=[
+            ("draft", "Draft"),
+            ("published", "Published"),
+        ],
+        default="draft",
+    )
+
     amenities = models.ManyToManyField(
         Amenity,
         blank=True,
         related_name="properties",
     )
-
-    
 
     youtube_url = models.URLField(
         blank=True,
@@ -230,22 +221,24 @@ class PropertyImage(models.Model):
         default=1,
     )
 
+    is_active = models.BooleanField(
+        default=True,
+    )
+
     class Meta:
         ordering = ["display_order"]
-
         constraints = [
             models.UniqueConstraint(
-                fields=["property", "display_order"],
+                fields=[
+                    "property",
+                    "display_order",
+                ],
                 name="unique_property_image_display_order",
             ),
         ]
 
     def __str__(self):
-        return (
-            f"{self.property.title} "
-            f"- Image {self.display_order}"
-        )
-
+        return f"{self.property.title} - Image {self.display_order}"
 
 class VirtualTour(models.Model):
     property = models.OneToOneField(
@@ -268,7 +261,7 @@ class VirtualTour(models.Model):
     )
 
     def __str__(self):
-        return f"{self.property.title} - Virtual Tour"
+        return f"{self.property.title} - {self.title}"
 
 
 class TourScene(models.Model):
@@ -294,10 +287,8 @@ class TourScene(models.Model):
         ordering = ["display_order"]
 
     def __str__(self):
-        return (
-            f"{self.virtual_tour.property.title} "
-            f"- {self.name}"
-        )
+        return f"{self.virtual_tour.property.title} - {self.name}"
+
 
 class TourHotspot(models.Model):
     scene = models.ForeignKey(
@@ -317,7 +308,6 @@ class TourHotspot(models.Model):
         default="Go here",
     )
 
-    # Position inside the 360° panorama
     yaw = models.FloatField(
         help_text="Horizontal position in degrees.",
     )

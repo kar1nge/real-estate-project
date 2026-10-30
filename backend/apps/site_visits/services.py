@@ -1,9 +1,12 @@
 from django.conf import settings
 from django.core.mail import send_mail
 
+from apps.contacts.services import get_company_settings
+
 
 def send_site_visit_notification(booking):
 
+    company = get_company_settings()
     schedule = booking.schedule
 
     send_mail(
@@ -15,7 +18,7 @@ def send_site_visit_notification(booking):
             f"""
 Dear Marketing Team,
 
-A new site visit request has been submitted through the {settings.COMPANY_NAME} website.
+A new site visit request has been submitted through the {company.name} website.
 
 Booking Details
 --------------------------------------------------
@@ -34,15 +37,14 @@ Please follow up with the visitor to confirm any additional arrangements and ens
 
 Kind Regards,
 
-{settings.COMPANY_NAME}
+{company.name}
 Automated Notification System
 
 Contact:
-{settings.COMPANY_EMAIL}
-{settings.COMPANY_PHONE}
+{company.email}
+{company.phone}
 
-{settings.COMPANY_ADDRESS}
-
+{company.address}
 """
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
@@ -53,18 +55,19 @@ Contact:
 
 def send_site_visit_confirmation(booking):
 
+    company = get_company_settings()
     schedule = booking.schedule
 
     send_mail(
         subject=(
             f"Site Visit Request Received | "
-            f"{settings.COMPANY_NAME}"
+            f"{company.name}"
         ),
         message=(
             f"""
 Dear {booking.visitor_name},
 
-Thank you for your interest in {settings.COMPANY_NAME}.
+Thank you for your interest in {company.name}.
 We have received your site visit request for:
 
 Property:
@@ -82,15 +85,15 @@ If you have any questions, please feel free to contact us.
 
 Kind Regards,
 
-{settings.COMPANY_NAME}
+{company.name}
 
 Email:
-{settings.COMPANY_EMAIL}
+{company.email}
 
 Phone:
-{settings.COMPANY_PHONE}
+{company.phone}
 
-{settings.COMPANY_ADDRESS}
+{company.address}
 """
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
@@ -101,12 +104,13 @@ Phone:
 
 def send_visit_confirmed_email(booking):
 
+    company = get_company_settings()
     schedule = booking.schedule
 
     send_mail(
         subject=(
             f"Your Site Visit Has Been Confirmed | "
-            f"{settings.COMPANY_NAME}"
+            f"{company.name}"
         ),
         message=(
             f"""
@@ -130,13 +134,13 @@ If you need to make any changes, please contact us.
 
 Kind Regards,
 
-{settings.COMPANY_NAME}
+{company.name}
 
 Email:
-{settings.COMPANY_EMAIL}
+{company.email}
 
 Phone:
-{settings.COMPANY_PHONE}
+{company.phone}
 """
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
