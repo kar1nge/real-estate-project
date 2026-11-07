@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in the deployment .env file}
+      POSTGRES_USER: ${DB_USER:?Set DB_USER in the deployment .env file}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the deployment .env file}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DJANGO_ENV: production
+      DJANGO_DEBUG: "false"
+      DJANGO_MEDIA_STORAGE: local
+      DJANGO_MEDIA_ROOT: /var/data/media
+      DB_HOST: db
+      DB_PORT: "5432"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - media_data:/var/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app
+
+volumes:
+  postgres_data:
+  media_data:
+
+networks:
+  app:
+    driver: bridge

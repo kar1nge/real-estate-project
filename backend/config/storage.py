@@ -52,4 +52,4 @@ class CompressedImageStorageMixin:
 
 
 class CompressedImageStorage(CompressedImageStorageMixin, FileSystemStorage):
-    """Compressed uploads stored on the local filesystem (development only)."""
+    """Compressed uploads stored on a local or mounted persistent filesystem."""

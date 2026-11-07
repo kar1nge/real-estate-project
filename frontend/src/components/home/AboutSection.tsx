@@ -3,7 +3,7 @@ import aboutImage from "../../assets/images/about-us.jfif";
 
 function AboutSection() {
     return (
-        <section className="relative overflow-hidden py-[clamp(3rem,7vw,6rem)]">
+        <section className="relative overflow-hidden bg-white py-[clamp(3rem,7vw,6rem)]">
             <div className="mx-auto grid w-full max-w-7xl items-center gap-[clamp(2.5rem,6vw,4rem)] px-[clamp(1rem,4vw,2.5rem)] md:grid-cols-12">
 
                 {/* Left — Story */}

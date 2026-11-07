@@ -353,7 +353,7 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
-elif settings.MEDIA_STORAGE_BACKEND == "render_disk":
+elif settings.MEDIA_STORAGE_BACKEND in {"render_disk", "local"}:
     urlpatterns += [
         re_path(r"^media/(?P<path>.+)$", persistent_media_file, name="uploaded-media"),
     ]

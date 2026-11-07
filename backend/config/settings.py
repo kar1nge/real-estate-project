@@ -243,20 +243,19 @@ elif MEDIA_STORAGE_BACKEND == "railway_bucket":
             "Railway bucket storage requires: " + ", ".join(missing_bucket_settings)
         )
 elif MEDIA_STORAGE_BACKEND == "local":
-    if not DEBUG:
+    # Local media is durable on a VPS when MEDIA_ROOT is mounted to a persistent
+    # host directory (for example with the Docker Compose media volume).
+    if not DEBUG and not os.getenv("DJANGO_MEDIA_ROOT"):
         raise ImproperlyConfigured(
-            "Production media must use durable storage; configure the Render "
-            "persistent disk or set DJANGO_MEDIA_STORAGE=railway_bucket with "
-            "its credentials."
+            "Production local media must use a persistent mount; set DJANGO_MEDIA_ROOT."
         )
 else:
     raise ImproperlyConfigured(
         "DJANGO_MEDIA_STORAGE must be 'local', 'render_disk', or 'railway_bucket'."
     )
 
-# Uploaded ImageField media is compressed before storage. Production defaults
-# to Render's mounted persistent disk; Railway's S3-compatible bucket remains
-# available when explicitly selected.
+# Uploaded ImageField media is compressed before storage. Production media must
+# be placed on a persistent disk or object store.
 STORAGES = {
     "default": {
         "BACKEND": (

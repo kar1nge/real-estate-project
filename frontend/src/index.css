@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Keep public pages light on mobile browsers that try to auto-darken sites.
+   The CMS dark theme overrides this on its own shell when selected. */
+:root {
+  color-scheme: only light;
+  background-color: #FAFAF8;
+}
+
+body {
+  background-color: #FAFAF8;
+}
+
 /* Theme preference applies only inside the CMS shell. */
 [data-cms-theme="dark"] {
   color-scheme: dark;
