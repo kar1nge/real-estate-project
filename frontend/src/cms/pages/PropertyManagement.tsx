@@ -484,6 +484,61 @@ function PropertyManagement() {
     }
   };
 
+  const handleCreatePropertyWithImage = async (file: File) => {
+    const validationError = validateForm();
+    if (validationError) {
+      setSaveError(validationError);
+      setImageError("Complete the required property details before adding its first image.");
+      return;
+    }
+
+    setSaving(true);
+    setImageUploading(true);
+    setSaveError("");
+    setImageError(null);
+    setSuccessMessage("");
+
+    let imageUploaded = false;
+    try {
+      const intendedPayload = buildPayload();
+      const draftPayload: PropertyManagementData = {
+        ...intendedPayload,
+        publication_status: "draft",
+        featured: false,
+        homepage_order: null,
+      };
+      const createdProperty = await createProperty(draftPayload);
+
+      setEditingPropertyId(createdProperty.id);
+      setShowCreateForm(false);
+      setActiveSection("gallery");
+      setCurrentPage(1);
+      setSuccessMessage("Saved as a draft. Uploading the first image...");
+      await loadProperties(1);
+
+      await uploadPropertyImage(createdProperty.id, file);
+      imageUploaded = true;
+
+      if (intendedPayload.publication_status === "published") {
+        await updateProperty(createdProperty.id, intendedPayload);
+      }
+
+      await loadProperties(1);
+      setSuccessMessage("Property and image saved successfully.");
+    } catch (error) {
+      setImageError(
+        imageUploaded
+          ? "The image uploaded, but the property could not be published. It remains a draft; save your changes to try again."
+          : error instanceof Error
+            ? `${error.message} The property remains a draft.`
+            : "The property image could not be uploaded. The property remains a draft.",
+      );
+    } finally {
+      setSaving(false);
+      setImageUploading(false);
+    }
+  };
+
   const toggleSection = (section: string) => {
     setActiveSection((current) => (current === section ? null : section));
   };
@@ -990,26 +1045,35 @@ function PropertyManagement() {
                     Add images to this property. Existing images can be replaced
                     or activated/deactivated.
                   </p>
+                  {showCreateForm && (
+                    <p className="mt-1 text-xs leading-5 text-[#9A978F]">
+                      Adding the first image will save this listing as a draft before uploading.
+                    </p>
+                  )}
                 </div>
 
-                {currentEditingProperty && (
+                {(currentEditingProperty || showCreateForm) && (
                   <label
                     className={`inline-flex shrink-0 cursor-pointer items-center justify-center rounded-sm border border-[#C5A572] bg-[#C5A572] px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.1em] text-white transition hover:bg-[#B39461] ${
-                      imageUploading ? "pointer-events-none opacity-60" : ""
+                      imageUploading || saving ? "pointer-events-none opacity-60" : ""
                     }`}
                   >
-                    {imageUploading ? "Uploading..." : "Add Image"}
+                    {imageUploading ? "Saving and uploading..." : "Add Image"}
 
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      disabled={imageUploading}
+                      disabled={imageUploading || saving}
                       onChange={(event) => {
                         const file = event.target.files?.[0];
 
-                        if (file && currentEditingProperty) {
-                          handleImageUpload(currentEditingProperty.id, file);
+                        if (file) {
+                          if (currentEditingProperty) {
+                            handleImageUpload(currentEditingProperty.id, file);
+                          } else if (showCreateForm) {
+                            handleCreatePropertyWithImage(file);
+                          }
                         }
 
                         event.target.value = "";
