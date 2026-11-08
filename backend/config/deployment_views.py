@@ -1,6 +1,7 @@
 """Public health, frontend, and persistent-media endpoints for deployment."""
 
 import mimetypes
+import re
 from pathlib import Path
 
 from django.conf import settings
@@ -33,7 +34,28 @@ def frontend_index(request):
         'property="og:image" content="/static/og-image.jpg"',
         f'property="og:image" content="{preview_image_url}"',
     )
-    return HttpResponse(html, content_type="text/html; charset=utf-8")
+    path = request.path_info.rstrip("/") or "/"
+    known_paths = {
+        "/", "/properties", "/about", "/faqs", "/inquiry",
+        "/book-site-visit", "/contact", "/privacy", "/terms",
+        "/manage", "/manage/login", "/manage/activate",
+        "/manage/company-settings", "/manage/hero", "/manage/properties",
+        "/manage/content", "/manage/employees", "/manage/my-account",
+        "/manage/accounts",
+    }
+    is_known_path = path in known_paths or bool(re.fullmatch(r"/activate/[^/]+", path))
+
+    if not is_known_path:
+        property_match = re.fullmatch(r"/properties/([^/]+)", path)
+        if property_match:
+            from apps.properties.models import Property
+
+            is_known_path = Property.objects.filter(slug=property_match.group(1)).exists()
+
+    response = HttpResponse(html, content_type="text/html; charset=utf-8")
+    if not is_known_path:
+        response.status_code = 404
+    return response
 
 
 def persistent_media_file(request, path):
