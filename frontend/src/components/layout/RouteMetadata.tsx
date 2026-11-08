@@ -53,7 +53,12 @@ export default function RouteMetadata() {
     const isCms = pathname.startsWith("/manage") || pathname.startsWith("/activate/");
     const isPropertyDetails = pathname.startsWith("/properties/");
     const isNotFound = !pageMetadata[pathname] && !isPropertyDetails && !isCms;
-    const metadata = pageMetadata[pathname] ?? (isPropertyDetails
+    const metadata = pageMetadata[pathname] ?? (isCms
+      ? {
+          title: "Website Management | NduKaWa Properties",
+          description: "Manage NduKaWa Properties website content.",
+        }
+      : isPropertyDetails
       ? {
           title: "Property Details | NduKaWa Properties",
           description: "View property details, photos, location, and viewing information from NduKaWa Properties.",

@@ -46,7 +46,7 @@ function getCsrfToken(): string {
 export async function getPropertiesForManagement(
   page = 1,
 ): Promise<PaginatedProperties> {
-  const url = new URL(API_URL);
+  const url = new URL(API_URL, window.location.origin);
   url.searchParams.set("page", String(page));
 
   const response = await fetch(url.toString(), {
