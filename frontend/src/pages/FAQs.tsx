@@ -10,6 +10,7 @@ function FAQs() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     async function loadFAQs() {
@@ -18,6 +19,7 @@ function FAQs() {
         setFaqs(data);
       } catch (error) {
         console.error("Failed to load FAQs:", error);
+        setHasError(true);
       } finally {
         setLoading(false);
       }
@@ -158,6 +160,11 @@ function FAQs() {
               {loading ? (
                 <div className="py-8 text-sm text-[#4A4A4A]">
                   Loading questions...
+                </div>
+              ) : hasError ? (
+                <div role="alert" className="py-10 text-sm leading-7 text-[#4A4A4A]">
+                  <p>We couldn’t load the questions just now.</p>
+                  <button type="button" onClick={() => window.location.reload()} className="mt-3 underline underline-offset-4">Try again</button>
                 </div>
               ) : filteredFAQs.length > 0 ? (
                 filteredFAQs.map((faq) => (

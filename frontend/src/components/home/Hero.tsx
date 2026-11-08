@@ -6,6 +6,7 @@ function Hero() {
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         const fetchSlides = async () => {
@@ -14,6 +15,7 @@ function Hero() {
                 setSlides(data);
             } catch (error) {
                 console.error("Error fetching hero slides:", error);
+                setHasError(true);
             } finally {
                 setLoading(false);
             }
@@ -42,8 +44,9 @@ function Hero() {
 
     if (slides.length === 0) {
         return (
-            <section className="flex h-screen items-center justify-center">
-                <p>No Hero Slides Available.</p>
+            <section className="flex h-screen flex-col items-center justify-center gap-4 bg-[#18352F] px-6 text-center text-white">
+                <p>{hasError ? "We couldn’t load the featured homes." : "Our featured homes are being prepared."}</p>
+                {hasError && <button type="button" onClick={() => window.location.reload()} className="rounded-full border border-white/50 px-5 py-2 text-sm hover:bg-white hover:text-[#18352F]">Try again</button>}
             </section>
         );
     }

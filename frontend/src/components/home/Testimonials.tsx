@@ -8,6 +8,7 @@ import {
 function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     getTestimonials()
@@ -15,7 +16,10 @@ function Testimonials() {
         setTestimonials(items);
         setActiveIndex(0);
       })
-      .catch((error) => console.error("Failed to load testimonials:", error));
+      .catch((error) => {
+        console.error("Failed to load testimonials:", error);
+        setHasError(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -26,7 +30,10 @@ function Testimonials() {
     return () => window.clearInterval(interval);
   }, [testimonials.length]);
 
-  if (!testimonials.length) return null;
+  if (!testimonials.length) {
+    if (!hasError) return null;
+    return <section role="alert" className="px-6 py-12 text-center text-sm text-gray-500">Client stories couldn’t load just now. Please try again later.</section>;
+  }
   const testimonial = testimonials[activeIndex];
   const show = (index: number) =>
     setActiveIndex((index + testimonials.length) % testimonials.length);

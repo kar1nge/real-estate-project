@@ -28,10 +28,12 @@ export function AnimatedNumber({ value, suffix }: { value: number; suffix: strin
 function Statistics() {
     const [statistics, setStatistics] = useState<Statistic[]>([]);
     const [loaded, setLoaded] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         getStatistics().then(setStatistics).catch((error) => {
             console.error("Failed to load statistics:", error);
+            setHasError(true);
         }).finally(() => setLoaded(true));
     }, []);
 
@@ -52,6 +54,7 @@ function Statistics() {
                         </motion.div>
                     ))}
                 </div>
+                {loaded && hasError && <p role="alert" className="mt-6 text-center text-sm text-gray-500">Our figures couldn’t load just now. Please try again later.</p>}
             </div>
         </section>
     );

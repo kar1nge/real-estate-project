@@ -51,21 +51,23 @@ export default function RouteMetadata() {
 
   useEffect(() => {
     const isCms = pathname.startsWith("/manage") || pathname.startsWith("/activate/");
-    const metadata = pageMetadata[pathname] ?? (pathname.startsWith("/properties/")
+    const isPropertyDetails = pathname.startsWith("/properties/");
+    const isNotFound = !pageMetadata[pathname] && !isPropertyDetails && !isCms;
+    const metadata = pageMetadata[pathname] ?? (isPropertyDetails
       ? {
           title: "Property Details | NduKaWa Properties",
           description: "View property details, photos, location, and viewing information from NduKaWa Properties.",
         }
       : {
-          title: "NduKaWa Properties | Premium Real Estate",
-          description: "Discover premium homes and property opportunities with NduKaWa Properties.",
+          title: "Page Not Found | NduKaWa Properties",
+          description: "The page you are looking for could not be found.",
         });
 
     document.title = metadata.title;
     setMeta("name", "description", metadata.description);
     setMeta("property", "og:title", metadata.title);
     setMeta("property", "og:description", metadata.description);
-    setMeta("name", "robots", isCms ? "noindex, nofollow" : "index, follow");
+    setMeta("name", "robots", isCms || isNotFound ? "noindex, nofollow" : "index, follow");
   }, [pathname]);
 
   return null;

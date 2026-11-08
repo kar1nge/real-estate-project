@@ -561,6 +561,13 @@ const currentLocationPage =
                             <p className="text-sm text-red-500">
                                 {error}
                             </p>
+                            <button
+                                type="button"
+                                onClick={() => window.location.reload()}
+                                className="mt-5 rounded-full border border-neutral-300 px-5 py-2 text-sm transition hover:border-neutral-900"
+                            >
+                                Try again
+                            </button>
                         </div>
                     )}
 

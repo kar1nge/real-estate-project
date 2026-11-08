@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
@@ -64,7 +65,11 @@ function PropertyDetails() {
         setProperty(data);
       } catch (err) {
         console.error("Error loading property:", err);
-        setError("We couldn't load this property right now.");
+        setError(
+          axios.isAxiosError(err) && err.response?.status === 404
+            ? "not_found"
+            : "We couldn’t load this property right now."
+        );
       } finally {
         setLoading(false);
       }
@@ -93,8 +98,10 @@ function PropertyDetails() {
         <Navbar />
 
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
-          <p className="text-sm text-red-500">
-            {error || "Property not found."}
+          <p className="text-sm text-neutral-600" role="alert">
+            {error === "not_found"
+              ? "This property isn’t available. It may have been removed or the link may be incorrect."
+              : error || "This property isn’t available."}
           </p>
 
           <Link

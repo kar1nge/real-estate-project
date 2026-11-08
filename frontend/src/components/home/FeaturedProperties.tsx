@@ -7,6 +7,7 @@ import type { Property } from "../../types/property";
 function FeaturedProperties() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
 
     const publishedProperties = [...properties]
         .filter((property) => property.publication_status === "published")
@@ -56,6 +57,7 @@ function FeaturedProperties() {
                 );
             } catch (error) {
                 console.error("Error fetching properties:", error);
+                setHasError(true);
             } finally {
                 setLoading(false);
             }
@@ -75,7 +77,10 @@ function FeaturedProperties() {
     if (homepageProperties.length === 0) {
         return (
             <section className="flex min-h-[clamp(16rem,30vw,24rem)] items-center justify-center px-[clamp(1rem,4vw,2.5rem)] text-center">
-                Featured properties are being prepared.
+                <div>
+                    <p>{hasError ? "We couldn’t load properties just now." : "Featured properties are being prepared."}</p>
+                    {hasError && <button type="button" onClick={() => window.location.reload()} className="mt-4 rounded-full border border-neutral-300 px-5 py-2 text-sm hover:border-neutral-900">Try again</button>}
+                </div>
             </section>
         );
     }

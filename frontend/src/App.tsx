@@ -2,6 +2,8 @@ import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import RouteMetadata from "./components/layout/RouteMetadata";
+import AppErrorBoundary from "./components/layout/AppErrorBoundary";
+import NotFound from "./pages/NotFound";
 
 const Home = lazy(() => import("./pages/Home"));
 const Properties = lazy(() => import("./pages/Properties"));
@@ -32,8 +34,9 @@ function App() {
       <ScrollToTop />
       <RouteMetadata />
 
-      <Suspense fallback={<div className="min-h-[50vh]" aria-busy="true" />}>
-        <Routes>
+      <AppErrorBoundary>
+        <Suspense fallback={<div className="min-h-[50vh]" aria-busy="true" />}>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/properties/:slug" element={<PropertyDetails />} />
@@ -59,8 +62,10 @@ function App() {
             <Route path="my-account" element={<MyAccount />} />
             <Route path="accounts" element={<CmsAccounts />} />
           </Route>
-        </Routes>
-      </Suspense>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </AppErrorBoundary>
     </>
   );
 }

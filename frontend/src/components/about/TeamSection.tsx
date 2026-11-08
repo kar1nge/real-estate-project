@@ -6,6 +6,7 @@ import type { TeamMember } from "../../types/team";
 function TeamSection() {
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
     const [loading, setLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         async function loadTeam() {
@@ -14,6 +15,7 @@ function TeamSection() {
                 setTeamMembers(data);
             } catch (error) {
                 console.error("Failed to load team members:", error);
+                setHasError(true);
             } finally {
                 setLoading(false);
             }
@@ -146,6 +148,11 @@ function TeamSection() {
                                 </div>
                             </motion.article>
                         ))}
+                    </div>
+                ) : hasError ? (
+                    <div role="alert" className="mt-10 border-t border-gray-200 pt-8 text-sm text-gray-600">
+                        <p>We couldn’t load the team details just now.</p>
+                        <button type="button" onClick={() => window.location.reload()} className="mt-3 underline underline-offset-4">Try again</button>
                     </div>
                 ) : (
                     <div className="mt-[clamp(4rem,7vw,5rem)] border-t border-gray-200 pt-8">
