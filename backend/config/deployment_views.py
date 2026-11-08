@@ -27,7 +27,13 @@ def frontend_index(request):
     index_path = settings.FRONTEND_DIST_DIR / "index.html"
     if not index_path.is_file():
         raise Http404("The frontend has not been built for this deployment.")
-    return FileResponse(index_path.open("rb"), content_type="text/html")
+    html = index_path.read_text(encoding="utf-8")
+    preview_image_url = request.build_absolute_uri("/static/og-image.jpg")
+    html = html.replace(
+        'property="og:image" content="/static/og-image.jpg"',
+        f'property="og:image" content="{preview_image_url}"',
+    )
+    return HttpResponse(html, content_type="text/html; charset=utf-8")
 
 
 def persistent_media_file(request, path):
