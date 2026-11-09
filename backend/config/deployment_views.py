@@ -118,6 +118,7 @@ def frontend_index(request):
         "/manage/content", "/manage/employees", "/manage/my-account",
         "/manage/accounts",
         "/manage/site-visits",
+        "/manage/visitor-questions",
     }
     is_known_path = path in known_paths or bool(re.fullmatch(r"/activate/[^/]+", path))
 

@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import axios from "axios";
 import { getFAQs } from "../services/faqService";
+import { API_BASE_URL } from "../services/apiConfig";
 import { Link } from "react-router-dom";
 import type { FAQ } from "../types/faq";
 import Navbar from "../components/layout/Navbar";
@@ -11,6 +13,34 @@ function FAQs() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [questionForm, setQuestionForm] = useState({ name: "", email: "", phone: "", question: "" });
+  const [questionSending, setQuestionSending] = useState(false);
+  const [questionSent, setQuestionSent] = useState(false);
+  const [questionError, setQuestionError] = useState("");
+
+  async function submitQuestion(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setQuestionSending(true);
+    setQuestionSent(false);
+    setQuestionError("");
+    try {
+      await axios.post(`${API_BASE_URL}inquiries/create/`, {
+        name: questionForm.name,
+        email: questionForm.email,
+        phone: questionForm.phone,
+        subject: "FAQ question: " + questionForm.question.slice(0, 210),
+        message: questionForm.question,
+        property: null,
+      });
+      setQuestionSent(true);
+      setQuestionForm({ name: "", email: "", phone: "", question: "" });
+    } catch (error) {
+      console.error("Failed to submit FAQ question:", error);
+      setQuestionError(axios.isAxiosError(error) && error.response?.status === 403
+        ? "We couldn’t accept your question just now. Please try again shortly."
+        : "Your question couldn’t be sent. Please try again.");
+    } finally { setQuestionSending(false); }
+  }
 
   useEffect(() => {
     async function loadFAQs() {
@@ -215,12 +245,14 @@ function FAQs() {
               message and our team will be happy to assist.
             </p>
 
-            <Link
-              to="/inquiry"
-              className="mt-8 inline-block rounded-full border border-white px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-white hover:text-[#232323]"
-            >
-              Ask a Question
-            </Link>
+            {questionSent ? <p role="status" className="mx-auto mt-8 max-w-xl rounded-lg bg-white/10 p-4 text-sm text-white">Your question has been sent. Our team will reply to your email.</p> : <form onSubmit={submitQuestion} className="mx-auto mt-8 grid max-w-2xl gap-3 text-left sm:grid-cols-2">
+              <label className="text-xs text-white/75">Your name<input required maxLength={255} value={questionForm.name} onChange={e=>setQuestionForm({...questionForm,name:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-white/10 px-3 py-3 text-sm text-white placeholder:text-white/50" /></label>
+              <label className="text-xs text-white/75">Email for our reply<input required type="email" value={questionForm.email} onChange={e=>setQuestionForm({...questionForm,email:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-white/10 px-3 py-3 text-sm text-white placeholder:text-white/50" /></label>
+              <label className="text-xs text-white/75">Phone<input required value={questionForm.phone} onChange={e=>setQuestionForm({...questionForm,phone:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-white/10 px-3 py-3 text-sm text-white placeholder:text-white/50" /></label>
+              <label className="text-xs text-white/75 sm:col-span-2">Your question<textarea required rows={3} value={questionForm.question} onChange={e=>setQuestionForm({...questionForm,question:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-white/10 px-3 py-3 text-sm text-white placeholder:text-white/50" /></label>
+              {questionError && <p role="alert" className="text-sm text-red-200 sm:col-span-2">{questionError}</p>}
+              <button disabled={questionSending} className="justify-self-start rounded-full border border-white px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-white hover:text-[#232323] disabled:opacity-60">{questionSending ? "Sending…" : "Send your question"}</button>
+            </form>}
           </div>
         </div>
       </section>

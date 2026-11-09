@@ -1,4 +1,6 @@
-# Render staging deployment
+# Legacy Render staging configuration
+
+> **Not the live deployment.** The production website is hosted with Hosting Africa at `https://ndukawaproperties.co.ke/`. This guide describes an older, optional Render staging setup only. Do not use it to deploy production changes.
 
 The repository is configured to deploy the Django API, React website, PostgreSQL database, and uploaded property images through Render. A single Docker web service serves the public pages, CMS, API, and uploaded media from one HTTPS origin.
 

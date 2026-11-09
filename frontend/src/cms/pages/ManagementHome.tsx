@@ -32,6 +32,11 @@ const sections = [
     description: "Create viewing times, add phone bookings, and confirm website requests.",
     to: "/manage/site-visits",
   },
+  {
+    title: "Visitor Questions",
+    description: "Review questions sent from the FAQs page and email visitors a reply.",
+    to: "/manage/visitor-questions",
+  },
 ];
 
 export default function ManagementHome() {

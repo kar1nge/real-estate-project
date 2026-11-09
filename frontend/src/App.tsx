@@ -28,6 +28,7 @@ const CmsAccounts = lazy(() => import("./cms/pages/CmsAccounts"));
 const EmployeeManagement = lazy(() => import("./cms/pages/EmployeeManagement"));
 const MyAccount = lazy(() => import("./cms/pages/MyAccount"));
 const SiteVisitManagement = lazy(() => import("./cms/pages/SiteVisitManagement"));
+const VisitorQuestions = lazy(() => import("./cms/pages/VisitorQuestions"));
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
             <Route path="content" element={<WebsiteContentManagement />} />
             <Route path="employees" element={<EmployeeManagement />} />
             <Route path="site-visits" element={<SiteVisitManagement />} />
+            <Route path="visitor-questions" element={<VisitorQuestions />} />
             <Route path="my-account" element={<MyAccount />} />
             <Route path="accounts" element={<CmsAccounts />} />
           </Route>

@@ -7,6 +7,7 @@ const links = [
   { label: "Properties", to: "/manage/properties" },
   { label: "Company & Contacts", to: "/manage/company-settings" },
   { label: "Website Content", to: "/manage/content" },
+  { label: "Visitor Questions", to: "/manage/visitor-questions" },
   { label: "Employees", to: "/manage/employees" },
   { label: "Site Visits", to: "/manage/site-visits" },
   { label: "Hero Slides", to: "/manage/hero" },

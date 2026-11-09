@@ -1,6 +1,6 @@
-# Railway staging deployment (previous provider configuration)
+# Legacy Railway staging configuration (previous provider)
 
-Render is the selected staging provider. Use [RENDER_STAGING.md](RENDER_STAGING.md) for the current setup. This file and `railway.json` are retained as prior provider notes; they are not used by Render.
+The production website is hosted with Hosting Africa at `https://ndukawaproperties.co.ke/`. This file and `railway.json` are retained for reference only and do not describe the live deployment. Do not use this guide to deploy production changes.
 
 The repository is configured to build the React frontend and Django API into one Railway web service. This keeps CMS sessions and API calls on the same HTTPS origin. PostgreSQL and a private Railway Storage Bucket are separate services in the same Railway project.
 

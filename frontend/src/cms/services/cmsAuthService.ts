@@ -51,6 +51,8 @@ async function getCsrfToken(): Promise<string> {
   return data.csrfToken;
 }
 
+export const getCmsCsrfToken = getCsrfToken;
+
 export async function signInCms(username: string, password: string): Promise<CmsUser> {
   const csrfToken = await getCsrfToken();
   const response = await fetch(LOGIN_URL, {

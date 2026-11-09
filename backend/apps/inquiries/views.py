@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.throttling import ScopedRateThrottle
 
 from .models import Inquiry
-from .serializers import InquirySerializer
+from .serializers import InquiryManagementSerializer, InquirySerializer
 from .services import (
     send_inquiry_notification,
     )
@@ -39,4 +39,10 @@ class InquiryListAPIView(generics.ListAPIView):
 
     queryset = Inquiry.objects.all()
     serializer_class = InquirySerializer
+    permission_classes = [IsAdminUser]
+
+
+class InquiryManagementDetailAPIView(generics.RetrieveUpdateAPIView):
+    queryset = Inquiry.objects.all()
+    serializer_class = InquiryManagementSerializer
     permission_classes = [IsAdminUser]
