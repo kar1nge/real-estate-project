@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import axios from "axios";
 import { getFAQs } from "../services/faqService";
 import { API_BASE_URL } from "../services/apiConfig";
-import { Link } from "react-router-dom";
 import type { FAQ } from "../types/faq";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
