@@ -39,6 +39,7 @@ from config.deployment_views import (
     health_check,
     persistent_media_file,
     robots_txt,
+    sitemap_xml,
 )
 from apps.cms_accounts.models import CmsAccountProfile, hash_invitation_token
 from rest_framework.decorators import api_view, throttle_classes
@@ -323,6 +324,7 @@ def cms_my_account_view(request):
 urlpatterns = [
     path("api/health/", health_check, name="health-check"),
     path("robots.txt", robots_txt, name="robots-txt"),
+    path("sitemap.xml", sitemap_xml, name="sitemap-xml"),
     path("api/csrf/", csrf_token_view, name="csrf-token"),
     path("api/cms/session/", cms_session_view, name="cms-session"),
     path("api/cms/login/", csrf_protect(cms_login_view), name="cms-login"),

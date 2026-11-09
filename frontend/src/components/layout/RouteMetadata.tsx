@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { getProperty } from "../../services/propertyService";
 
 const pageMetadata: Record<string, { title: string; description: string }> = {
   "/": {
@@ -48,8 +49,10 @@ function setMeta(attribute: "name" | "property", key: string, content: string) {
 
 export default function RouteMetadata() {
   const { pathname } = useLocation();
+  const slug = pathname.match(/^\/properties\/([^/]+)/)?.[1];
 
   useEffect(() => {
+    let active = true;
     const isCms = pathname.startsWith("/manage") || pathname.startsWith("/activate/");
     const isPropertyDetails = pathname.startsWith("/properties/");
     const isNotFound = !pageMetadata[pathname] && !isPropertyDetails && !isCms;
@@ -72,8 +75,40 @@ export default function RouteMetadata() {
     setMeta("name", "description", metadata.description);
     setMeta("property", "og:title", metadata.title);
     setMeta("property", "og:description", metadata.description);
+    setMeta("property", "og:image", new URL("/static/og-image.jpg", window.location.origin).toString());
+    setMeta("property", "og:type", "website");
+    setMeta("name", "twitter:image", new URL("/static/og-image.jpg", window.location.origin).toString());
     setMeta("name", "robots", isCms || isNotFound ? "noindex, nofollow" : "index, follow");
-  }, [pathname]);
+    const canonicalPath = pathname.endsWith("/") ? pathname : `${pathname}/`;
+    let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = new URL(canonicalPath, window.location.origin).toString();
+    setMeta("property", "og:url", canonical.href);
+
+    if (isPropertyDetails && slug) {
+      getProperty(slug).then((property) => {
+        if (!active) return;
+        const title = `${property.title} | NduKaWa Properties`;
+        const description = property.short_description || property.description.slice(0, 155);
+        const image = property.images[0]?.image;
+        document.title = title;
+        setMeta("name", "description", description);
+        setMeta("property", "og:title", title);
+        setMeta("property", "og:description", description);
+        if (image) {
+          setMeta("property", "og:image", image);
+          setMeta("name", "twitter:image", image);
+        }
+        setMeta("name", "twitter:title", title);
+        setMeta("name", "twitter:description", description);
+      }).catch(() => undefined);
+    }
+    return () => { active = false; };
+  }, [pathname, slug]);
 
   return null;
 }

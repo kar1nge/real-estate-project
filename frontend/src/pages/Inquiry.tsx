@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { createInquiry } from "../services/inquiryService";
 import { getProperties } from "../services/propertyService";
 import type { Property } from "../types/property";
@@ -76,7 +77,13 @@ function Inquiry() {
       });
     } catch (error) {
       console.error("Failed to submit inquiry:", error);
-      setError("Something went wrong. Please try again.");
+      setError(
+        axios.isAxiosError(error) && error.response?.status === 403
+          ? "Your inquiry was blocked by a site permission check. Please try again shortly or contact our team by phone."
+          : axios.isAxiosError(error) && error.response?.status === 400
+            ? "Please check the details in the form and try again."
+            : "We couldn’t send your inquiry just now. Please try again in a moment.",
+      );
     } finally {
       setSubmitting(false);
     }

@@ -1,7 +1,7 @@
 import logging
 
 from rest_framework import generics
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.throttling import ScopedRateThrottle
 
 from .models import Inquiry
@@ -17,6 +17,10 @@ class InquiryCreateAPIView(generics.CreateAPIView):
 
     queryset = Inquiry.objects.all()
     serializer_class = InquirySerializer
+    # Public form submissions must not inherit a staff session's CSRF
+    # requirement when a visitor shares a browser with a CMS user.
+    authentication_classes = []
+    permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "inquiry_creation"
 

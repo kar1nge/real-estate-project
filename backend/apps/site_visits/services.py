@@ -48,7 +48,7 @@ Contact:
 """
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[settings.MARKETING_EMAIL],
+        recipient_list=[settings.MARKETING_EMAIL or company.email],
         fail_silently=False,
     )
 

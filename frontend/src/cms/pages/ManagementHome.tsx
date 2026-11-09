@@ -27,6 +27,11 @@ const sections = [
     description: "Add, edit, and show or hide employee profiles on the website.",
     to: "/manage/employees",
   },
+  {
+    title: "Site Visits",
+    description: "Create viewing times, add phone bookings, and confirm website requests.",
+    to: "/manage/site-visits",
+  },
 ];
 
 export default function ManagementHome() {
