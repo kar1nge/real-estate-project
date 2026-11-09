@@ -37,6 +37,7 @@ from django.views.decorators.csrf import csrf_protect
 from config.deployment_views import (
     frontend_index,
     health_check,
+    google_site_verification,
     persistent_media_file,
     robots_txt,
     sitemap_xml,
@@ -323,6 +324,11 @@ def cms_my_account_view(request):
 
 urlpatterns = [
     path("api/health/", health_check, name="health-check"),
+    path(
+        "googleb81864fafb851b0a.html",
+        google_site_verification,
+        name="google-site-verification",
+    ),
     path("robots.txt", robots_txt, name="robots-txt"),
     path("sitemap.xml", sitemap_xml, name="sitemap-xml"),
     path("api/csrf/", csrf_token_view, name="csrf-token"),

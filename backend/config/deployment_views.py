@@ -28,6 +28,19 @@ def robots_txt(request):
     return HttpResponse("User-agent: *\nDisallow: /\n", content_type="text/plain")
 
 
+def google_site_verification(request):
+    """Serve Google's ownership verification file from the public site root."""
+    verification_file = (
+        settings.FRONTEND_DIST_DIR / "googleb81864fafb851b0a.html"
+    )
+    if not verification_file.is_file():
+        raise Http404("Google verification file is not present in this deployment.")
+    return HttpResponse(
+        verification_file.read_text(encoding="utf-8"),
+        content_type="text/html; charset=utf-8",
+    )
+
+
 def frontend_index(request):
     """Serve the built React application for BrowserRouter deep links."""
     index_path = settings.FRONTEND_DIST_DIR / "index.html"
