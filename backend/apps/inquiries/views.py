@@ -36,10 +36,18 @@ class InquiryCreateAPIView(generics.CreateAPIView):
         
 
 class InquiryListAPIView(generics.ListAPIView):
-
-    queryset = Inquiry.objects.all()
     serializer_class = InquirySerializer
     permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        queryset = Inquiry.objects.all()
+        category = self.request.query_params.get("category")
+        status_value = self.request.query_params.get("status")
+        if category and category != "all":
+            queryset = queryset.filter(faq_category=category)
+        if status_value and status_value != "all":
+            queryset = queryset.filter(status=status_value)
+        return queryset
 
 
 class InquiryManagementDetailAPIView(generics.RetrieveUpdateAPIView):

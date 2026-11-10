@@ -8,17 +8,21 @@ class InquirySerializer(serializers.ModelSerializer):
         model = Inquiry
         fields = "__all__"
         read_only_fields = (
-            "status",
+            "status", "response", "response_sent", "publish_to_faq",
+            "published_faq",
             "created_at",
             "updated_at",
         )
 
 
 class InquiryManagementSerializer(serializers.ModelSerializer):
+    faq_category_display = serializers.CharField(source="get_faq_category_display", read_only=True)
+
     class Meta:
         model = Inquiry
         fields = "__all__"
         read_only_fields = (
             "id", "property", "name", "email", "phone", "subject",
-            "message", "response_sent", "created_at", "updated_at",
+            "message", "faq_category", "faq_category_display", "response_sent",
+            "published_faq", "created_at", "updated_at",
         )

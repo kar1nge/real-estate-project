@@ -6,13 +6,19 @@ import type { FAQ } from "../types/faq";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 
+const FAQ_CATEGORIES = [
+  ["general", "General"], ["buying", "Buying"], ["renting", "Renting"],
+  ["site_visits", "Site Visits"], ["properties", "Properties"],
+  ["legal", "Legal"], ["support", "Support"],
+] as const;
+
 function FAQs() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [questionForm, setQuestionForm] = useState({ name: "", email: "", phone: "", question: "" });
+  const [questionForm, setQuestionForm] = useState({ name: "", email: "", phone: "", category: "general", question: "" });
   const [questionSending, setQuestionSending] = useState(false);
   const [questionSent, setQuestionSent] = useState(false);
   const [questionError, setQuestionError] = useState("");
@@ -29,10 +35,11 @@ function FAQs() {
         phone: questionForm.phone,
         subject: "FAQ question: " + questionForm.question.slice(0, 210),
         message: questionForm.question,
+        faq_category: questionForm.category,
         property: null,
       });
       setQuestionSent(true);
-      setQuestionForm({ name: "", email: "", phone: "", question: "" });
+      setQuestionForm({ name: "", email: "", phone: "", category: "general", question: "" });
     } catch (error) {
       console.error("Failed to submit FAQ question:", error);
       setQuestionError(axios.isAxiosError(error) && error.response?.status === 403
@@ -248,6 +255,7 @@ function FAQs() {
               <label className="text-xs text-white/75">Your name<input required maxLength={255} value={questionForm.name} onChange={e=>setQuestionForm({...questionForm,name:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-white/10 px-3 py-3 text-sm text-white placeholder:text-white/50" /></label>
               <label className="text-xs text-white/75">Email for our reply<input required type="email" value={questionForm.email} onChange={e=>setQuestionForm({...questionForm,email:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-white/10 px-3 py-3 text-sm text-white placeholder:text-white/50" /></label>
               <label className="text-xs text-white/75">Phone<input required value={questionForm.phone} onChange={e=>setQuestionForm({...questionForm,phone:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-white/10 px-3 py-3 text-sm text-white placeholder:text-white/50" /></label>
+              <label className="text-xs text-white/75">Question category<select required value={questionForm.category} onChange={e=>setQuestionForm({...questionForm,category:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-[#383838] px-3 py-3 text-sm text-white">{FAQ_CATEGORIES.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
               <label className="text-xs text-white/75 sm:col-span-2">Your question<textarea required rows={3} value={questionForm.question} onChange={e=>setQuestionForm({...questionForm,question:e.target.value})} className="mt-1 w-full rounded-md border border-white/30 bg-white/10 px-3 py-3 text-sm text-white placeholder:text-white/50" /></label>
               {questionError && <p role="alert" className="text-sm text-red-200 sm:col-span-2">{questionError}</p>}
               <button disabled={questionSending} className="justify-self-start rounded-full border border-white px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-white hover:text-[#232323] disabled:opacity-60">{questionSending ? "Sending…" : "Send your question"}</button>

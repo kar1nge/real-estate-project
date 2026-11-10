@@ -1,5 +1,6 @@
 from django.db import models
 from apps.properties.models import Property
+from apps.faqs.models import FAQ
 
 
 class Inquiry(models.Model):
@@ -34,6 +35,12 @@ class Inquiry(models.Model):
 
     message = models.TextField()
 
+    faq_category = models.CharField(
+        max_length=50,
+        choices=FAQ.CATEGORY_CHOICES,
+        default="general",
+    )
+
     response = models.TextField(
     blank=True,
     null=True
@@ -41,6 +48,16 @@ class Inquiry(models.Model):
 
     response_sent = models.BooleanField(
     default=False
+    )
+
+    publish_to_faq = models.BooleanField(default=False)
+
+    published_faq = models.ForeignKey(
+        FAQ,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="source_inquiries",
     )
 
     status = models.CharField(
