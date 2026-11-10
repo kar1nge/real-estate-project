@@ -171,6 +171,8 @@ def persistent_media_file(request, path):
         raise Http404("Media file not found.")
 
     content_type, _ = mimetypes.guess_type(media_path.name)
+    if media_path.suffix.lower() == ".jfif":
+        content_type = "image/jpeg"
     if not content_type or not content_type.startswith("image/"):
         raise Http404("Media file not found.")
 
