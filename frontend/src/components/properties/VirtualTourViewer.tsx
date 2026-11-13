@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Property, TourScene } from "../../types/property";
+import AnimatedImage from "../ui/AnimatedImage";
 
 declare global {
   interface Window {
@@ -172,7 +173,7 @@ function VirtualTourViewer({ property }: VirtualTourViewerProps) {
                   aria-current={selected ? "true" : undefined}
                   className={`group relative shrink-0 overflow-hidden rounded-xl border transition ${selected ? "border-white" : "border-white/10 hover:border-white/40"}`}
                 >
-                  <img src={scene.image} alt={scene.name} className="h-16 w-24 object-cover transition duration-300 group-hover:scale-105" />
+                  <AnimatedImage src={scene.image} alt={scene.name} frameClassName="h-16 w-24" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
                   <span className={`absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-left text-[9px] text-white ${selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                     {scene.name}
                   </span>

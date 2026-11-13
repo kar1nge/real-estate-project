@@ -8,6 +8,7 @@ import { AnimatedNumber } from "../components/home/Statistics";
 import { useLocation } from "react-router-dom";
 import Footer from "../components/layout/Footer";
 import Navbar from "../components/layout/Navbar";
+import AnimatedImage from "../components/ui/AnimatedImage";
 
 function About() {
     const location = useLocation();
@@ -57,9 +58,12 @@ function About() {
             }}
             className="relative min-h-[18rem] overflow-hidden rounded-[clamp(1.25rem,2.5vw,1.75rem)] lg:min-h-0"
           >
-            <img
+            <AnimatedImage
               src={aboutImage}
               alt="Saif Properties architecture"
+              loading="eager"
+              fetchPriority="high"
+              frameClassName="absolute inset-0"
               className="absolute inset-0 h-full w-full object-cover"
             />
 

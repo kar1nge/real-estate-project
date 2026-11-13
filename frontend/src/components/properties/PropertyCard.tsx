@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import AnimatedImage from "../ui/AnimatedImage";
 import type { Property } from "../../types/property";
 
 interface PropertyCardProps {
@@ -36,11 +37,13 @@ function PropertyCard({
                         rounded-[32px]
                     "
                 >
-                    <img
+                    <AnimatedImage
                         src={image}
                         alt={imageAlt}
                         loading={priority ? "eager" : "lazy"}
+                        fetchPriority={priority ? "high" : "auto"}
                         decoding="async"
+                        frameClassName="absolute inset-0"
                         className="
                             absolute
                             inset-0
@@ -138,11 +141,13 @@ function PropertyCard({
                         rounded-[28px]
                     "
                 >
-                    <img
+                    <AnimatedImage
                         src={image}
                         alt={imageAlt}
                         loading={priority ? "eager" : "lazy"}
+                        fetchPriority={priority ? "high" : "auto"}
                         decoding="async"
+                        frameClassName="absolute inset-0"
                         className="
                             absolute
                             inset-0
@@ -237,11 +242,13 @@ function PropertyCard({
                         rounded-[24px]
                     "
                 >
-                    <img
+                    <AnimatedImage
                         src={image}
                         alt={imageAlt}
                         loading={priority ? "eager" : "lazy"}
+                        fetchPriority={priority ? "high" : "auto"}
                         decoding="async"
+                        frameClassName="absolute inset-0"
                         className="
                             absolute
                             inset-0

@@ -4,6 +4,7 @@ import Footer from "../components/layout/Footer";
 import hero from "../assets/images/hero.jpg"
 
 import PropertyCard from "../components/properties";
+import AnimatedImage from "../components/ui/AnimatedImage";
 
 import type { Property } from "../types/property";
 
@@ -252,9 +253,12 @@ const currentLocationPage =
             <section className="relative min-h-[clamp(14rem,24vw,20rem)] overflow-hidden">
 
                 {/* Hero Image */}
-                <img
+                <AnimatedImage
                     src={hero}
                     alt="Luxury property in Nairobi"
+                    loading="eager"
+                    fetchPriority="high"
+                    frameClassName="absolute inset-0"
                     className="absolute inset-0 h-full w-full object-cover"
                 />
 

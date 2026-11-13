@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { getTeamMembers } from "../../services/teamService";
 import type { TeamMember } from "../../types/team";
+import AnimatedImage from "../ui/AnimatedImage";
 
 function TeamSection() {
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -94,11 +95,12 @@ function TeamSection() {
                                 {/* Portrait */}
                                 <div className="relative aspect-[4/5] overflow-hidden rounded-[clamp(1rem,2vw,1.5rem)] bg-gray-100">
                                     {member.photo ? (
-                                        <img
+                                        <AnimatedImage
                                             src={member.photo}
                                             alt={member.name}
                                             loading="lazy"
                                             decoding="async"
+                                            frameClassName="h-full w-full"
                                             className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
                                         />
                                     ) : (

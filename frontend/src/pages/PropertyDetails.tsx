@@ -9,6 +9,7 @@ import PropertyCard from "../components/properties";
 import type { Property } from "../types/property";
 import { getProperty } from "../services/propertyService";
 import VirtualTourViewer from "../components/properties/VirtualTourViewer";
+import AnimatedImage from "../components/ui/AnimatedImage";
 
 function getYoutubeEmbedUrl(url: string | null) {
   if (!url) return null;
@@ -176,9 +177,12 @@ function PropertyDetails() {
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="relative h-[clamp(25rem,52vw,40rem)] overflow-hidden rounded-[28px] sm:rounded-[36px]">
             {property.images?.[0]?.image ? (
-              <img
+              <AnimatedImage
                 src={property.images[0].image}
                 alt={property.images[0].alt_text || property.title}
+                loading="eager"
+                fetchPriority="high"
+                frameClassName="absolute inset-0"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
@@ -380,11 +384,12 @@ function PropertyDetails() {
                 {property.images?.length > 0 ? (
                   <>
                     {/* Current image */}
-                    <img
+                    <AnimatedImage
                       src={property.images[activeImage]?.image}
                       alt={
                         property.images[activeImage]?.alt_text || property.title
                       }
+                      frameClassName="absolute inset-0"
                       className="
                                     absolute
                                     inset-0

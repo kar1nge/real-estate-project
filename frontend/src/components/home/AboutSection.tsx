@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import aboutImage from "../../assets/images/about-us.jfif";
+import AnimatedImage from "../ui/AnimatedImage";
 
 function AboutSection() {
     return (
@@ -54,11 +55,12 @@ function AboutSection() {
                 >
                     <div className="relative h-[clamp(24rem,48vw,35rem)] overflow-hidden rounded-[clamp(1.5rem,3vw,2rem)]">
 
-                        <img
+                        <AnimatedImage
                             src={aboutImage}
                             alt="Saif Properties architecture"
                             loading="lazy"
                             decoding="async"
+                            frameClassName="absolute inset-0"
                             className="h-full w-full object-cover transition-transform duration-1000 hover:scale-105"
                         />
 
