@@ -17,6 +17,7 @@ function PropertyCard({
         property.images[0]?.alt_text || property.title;
 
     const propertyUrl = `/properties/${property.slug}`;
+    const unitLabel = `${property.available_units} ${property.available_units === 1 ? "Unit" : "Units"}`;
 
     switch (variant) {
         // ==========================================
@@ -83,7 +84,7 @@ function PropertyCard({
 
                             <p className="mt-2 text-sm text-white/70">
                                 {property.bedrooms} Beds •{" "}
-                                {property.bathrooms} Baths
+                                {property.bathrooms} Baths • {unitLabel}
                             </p>
 
                             {/* CTA */}
@@ -184,7 +185,7 @@ function PropertyCard({
 
                                 <p className="mt-1 text-xs text-white/65">
                                     {property.bedrooms} Beds •{" "}
-                                    {property.bathrooms} Baths
+                                    {property.bathrooms} Baths • {unitLabel}
                                 </p>
                             </div>
 
@@ -271,12 +272,17 @@ function PropertyCard({
                         </h2>
 
                         <div className="mt-2 flex items-center justify-between gap-3">
-                            <p className="text-base font-light">
-                                KSh{" "}
-                                {Number(
-                                    property.starting_price
-                                ).toLocaleString()}
-                            </p>
+                            <div>
+                                <p className="text-base font-light">
+                                    KSh{" "}
+                                    {Number(
+                                        property.starting_price
+                                    ).toLocaleString()}
+                                </p>
+                                <p className="mt-1 text-[10px] text-white/65">
+                                    {property.bedrooms} Beds • {property.bathrooms} Baths • {unitLabel}
+                                </p>
+                            </div>
 
                             {/* CTA */}
                             <div
