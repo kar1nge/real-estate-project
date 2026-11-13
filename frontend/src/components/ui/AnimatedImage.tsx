@@ -1,4 +1,4 @@
-import type { ImgHTMLAttributes } from "react";
+import { useState, type ImgHTMLAttributes } from "react";
 
 interface AnimatedImageProps
   extends Omit<ImgHTMLAttributes<HTMLImageElement>, "onLoad" | "onError"> {
@@ -15,10 +15,26 @@ function AnimatedImage({
   fetchPriority = "auto",
   ...imageProps
 }: AnimatedImageProps) {
+  const [loadedSrc, setLoadedSrc] = useState<string | undefined>();
+  const [failedSrc, setFailedSrc] = useState<string | undefined>();
+  const isSettled = Boolean(src) && (loadedSrc === src || failedSrc === src);
+  const framePosition = frameClassName.split(/\s+/).includes("absolute")
+    ? ""
+    : "relative";
+  const imagePosition = className.split(/\s+/).includes("absolute")
+    ? ""
+    : "relative";
+
   return (
     <span
-      className={`block animate-pulse overflow-hidden bg-gradient-to-br from-[#18352F] via-[#244E45] to-[#18352F] ${frameClassName}`}
+      className={`isolate block overflow-hidden ${framePosition} ${frameClassName}`}
     >
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 z-0 bg-gradient-to-br from-[#18352F] via-[#244E45] to-[#18352F] ${
+          isSettled ? "" : "animate-pulse"
+        }`}
+      />
       <img
         {...imageProps}
         src={src}
@@ -26,7 +42,9 @@ function AnimatedImage({
         loading={loading}
         decoding={decoding}
         fetchPriority={fetchPriority}
-        className={className}
+        onLoad={() => setLoadedSrc(src)}
+        onError={() => setFailedSrc(src)}
+        className={`${imagePosition} z-10 ${className}`}
       />
     </span>
   );
