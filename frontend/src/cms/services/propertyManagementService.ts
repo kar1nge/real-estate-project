@@ -13,6 +13,7 @@ export interface PropertyManagementData {
     property_type: number;
     status: number;
     starting_price: string;
+    available_units: number;
     bedrooms: number;
     bathrooms: number;
     location: number;

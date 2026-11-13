@@ -29,6 +29,18 @@ class HeroSlide(models.Model):
         default=True
     )
 
+    starts_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Optional time when this slide becomes visible.",
+    )
+
+    ends_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Optional time when this slide is hidden automatically.",
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True
     )

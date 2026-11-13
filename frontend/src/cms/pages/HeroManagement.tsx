@@ -14,6 +14,8 @@ interface HeroFormData {
   button_link: string;
   order: number;
   is_active: boolean;
+  starts_at: string;
+  ends_at: string;
   image: File | null;
 }
 
@@ -24,8 +26,35 @@ const emptyForm: HeroFormData = {
   button_link: "",
   order: 1,
   is_active: true,
+  starts_at: "",
+  ends_at: "",
   image: null,
 };
+
+function toDateTimeInput(value: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 16);
+}
+
+function toApiDateTime(value: string) {
+  return value ? new Date(value).toISOString() : "";
+}
+
+function getSlideVisibility(slide: HeroSlide) {
+  if (!slide.is_active) return "Inactive";
+  const now = Date.now();
+  if (slide.starts_at && new Date(slide.starts_at).getTime() > now) {
+    return "Scheduled";
+  }
+  if (slide.ends_at && new Date(slide.ends_at).getTime() <= now) {
+    return "Expired";
+  }
+  return "Visible";
+}
 
 function HeroManagement() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
@@ -89,6 +118,8 @@ function HeroManagement() {
       button_link: slide.button_link,
       order: slide.order,
       is_active: slide.is_active,
+      starts_at: toDateTimeInput(slide.starts_at),
+      ends_at: toDateTimeInput(slide.ends_at),
       image: null,
     });
 
@@ -132,6 +163,13 @@ function HeroManagement() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
+    const startsAt = formData.starts_at ? new Date(formData.starts_at) : null;
+    const endsAt = formData.ends_at ? new Date(formData.ends_at) : null;
+    if (startsAt && endsAt && startsAt >= endsAt) {
+      setMessage("The hide time must be later than the start time.");
+      return;
+    }
+
     setSaving(true);
     setMessage("");
 
@@ -143,6 +181,8 @@ function HeroManagement() {
     data.append("button_link", formData.button_link);
     data.append("order", String(formData.order));
     data.append("is_active", String(formData.is_active));
+    data.append("starts_at", toApiDateTime(formData.starts_at));
+    data.append("ends_at", toApiDateTime(formData.ends_at));
 
     if (formData.image) {
       data.append("image", formData.image);
@@ -405,12 +445,12 @@ function HeroManagement() {
                           <div className="absolute left-4 top-4">
                             <span
                               className={
-                                slide.is_active
+                                getSlideVisibility(slide) === "Visible"
                                   ? "rounded-full bg-white px-3 py-1 text-xs font-medium text-green-700 shadow-sm"
                                   : "rounded-full bg-[#232323] px-3 py-1 text-xs font-medium text-white shadow-sm"
                               }
                             >
-                              {slide.is_active ? "Active" : "Inactive"}
+                              {getSlideVisibility(slide)}
                             </span>
                           </div>
                         </div>
@@ -438,6 +478,16 @@ function HeroManagement() {
 
                           <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#6B6B6B]">
                             {slide.subtitle}
+                          </p>
+
+                          <p className="mt-2 text-xs leading-5 text-[#7A7A7A]">
+                            {slide.starts_at
+                              ? `Starts ${new Date(slide.starts_at).toLocaleString()}`
+                              : "No start time"}
+                            {" · "}
+                            {slide.ends_at
+                              ? `Hides ${new Date(slide.ends_at).toLocaleString()}`
+                              : "No end time"}
                           </p>
 
                           <div className="mt-4 border-t border-[#ECE9E3] pt-4">
@@ -642,11 +692,41 @@ function EditorFields({
                 </span>
 
                 <span className="block text-xs leading-5 text-[#7A7A7A]">
-                  Active slides are displayed on the public website.
+                  The slide is public only while active and within its schedule.
                 </span>
               </span>
             </label>
           </div>
+
+          <label>
+            <span className="mb-2 block text-sm font-medium text-[#2C2C2C]">
+              Start showing (optional)
+            </span>
+            <input
+              type="datetime-local"
+              name="starts_at"
+              value={formData.starts_at}
+              onChange={onInputChange}
+              className="w-full rounded-lg border border-[#DCD8D0] px-4 py-3 text-sm text-[#232323] outline-none transition focus:border-[#C5A572] focus:ring-2 focus:ring-[#C5A572]/15"
+            />
+          </label>
+
+          <label>
+            <span className="mb-2 block text-sm font-medium text-[#2C2C2C]">
+              Hide after (optional)
+            </span>
+            <input
+              type="datetime-local"
+              name="ends_at"
+              value={formData.ends_at}
+              onChange={onInputChange}
+              className="w-full rounded-lg border border-[#DCD8D0] px-4 py-3 text-sm text-[#232323] outline-none transition focus:border-[#C5A572] focus:ring-2 focus:ring-[#C5A572]/15"
+            />
+          </label>
+
+          <p className="lg:col-span-2 text-xs leading-5 text-[#7A7A7A]">
+            Times use your browser’s local time. Leave a date blank for no schedule limit.
+          </p>
         </div>
 
         <div className="mt-8 flex flex-col gap-4 border-t border-[#ECE9E3] pt-6 sm:flex-row sm:items-center sm:justify-between">

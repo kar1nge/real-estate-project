@@ -10,11 +10,15 @@ class HeroSlideAdmin(admin.ModelAdmin):
         "title",
         "order",
         "is_active",
+        "starts_at",
+        "ends_at",
         "created_at",
     )
 
     list_filter = (
         "is_active",
+        "starts_at",
+        "ends_at",
     )
 
     ordering = (

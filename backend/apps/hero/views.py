@@ -1,8 +1,18 @@
+from django.db.models import Q
+from django.utils import timezone
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 
 from .models import HeroSlide
 from .serializers import HeroSlideSerializer
+
+
+def currently_visible_hero_slides():
+    now = timezone.now()
+    return HeroSlide.objects.filter(is_active=True).filter(
+        Q(starts_at__isnull=True) | Q(starts_at__lte=now),
+        Q(ends_at__isnull=True) | Q(ends_at__gt=now),
+    )
 
 
 class HeroSlideListAPIView(
@@ -11,9 +21,7 @@ class HeroSlideListAPIView(
     serializer_class = HeroSlideSerializer
 
     def get_queryset(self):
-        return HeroSlide.objects.filter(
-            is_active=True
-        )
+        return currently_visible_hero_slides()
 
 
 class HeroSlideDetailAPIView(
@@ -21,9 +29,8 @@ class HeroSlideDetailAPIView(
 ):
     serializer_class = HeroSlideSerializer
 
-    queryset = HeroSlide.objects.filter(
-        is_active=True
-    )
+    def get_queryset(self):
+        return currently_visible_hero_slides()
 
 
 class HeroSlideManagementListCreateAPIView(

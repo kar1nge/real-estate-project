@@ -71,7 +71,9 @@ def frontend_index(request):
         from apps.properties.models import Property
 
         property_obj = Property.objects.filter(
-            slug=property_match.group(1), publication_status="published"
+            slug=property_match.group(1),
+            publication_status="published",
+            available_units__gt=0,
         ).select_related("location", "property_type", "status").prefetch_related("images").first()
         if property_obj:
             title = f"{property_obj.title} | NduKaWa Properties"
@@ -139,7 +141,10 @@ def sitemap_xml(request):
     urls = ["/", "/properties/", "/about/", "/faqs/", "/contact/", "/privacy/", "/terms/"]
     urls.extend(
         f"/properties/{slug}/"
-        for slug in Property.objects.filter(publication_status="published").values_list("slug", flat=True)
+        for slug in Property.objects.filter(
+            publication_status="published",
+            available_units__gt=0,
+        ).values_list("slug", flat=True)
     )
     response = HttpResponse(content_type="application/xml; charset=utf-8")
     xml = SimplerXMLGenerator(response, "utf-8")

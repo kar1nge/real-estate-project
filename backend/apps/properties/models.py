@@ -108,6 +108,11 @@ class Property(models.Model):
     bedrooms = models.PositiveIntegerField()
     bathrooms = models.PositiveIntegerField()
 
+    available_units = models.PositiveIntegerField(
+        default=1,
+        help_text="Set to 0 when all units have been sold.",
+    )
+
     location = models.ForeignKey(
         Location,
         on_delete=models.PROTECT,

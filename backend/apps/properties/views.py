@@ -52,7 +52,7 @@ def public_property_list_queryset():
     )
     return (
         Property.objects
-        .filter(publication_status="published")
+        .filter(publication_status="published", available_units__gt=0)
         .select_related("location", "property_type", "status")
         .prefetch_related(
             "amenities",
@@ -118,7 +118,7 @@ class PropertyDetailAPIView(generics.RetrieveAPIView):
         )
         similar_properties = (
             Property.objects
-            .filter(publication_status="published")
+            .filter(publication_status="published", available_units__gt=0)
             .select_related("location", "property_type", "status")
             .prefetch_related(
                 "amenities",
@@ -127,7 +127,7 @@ class PropertyDetailAPIView(generics.RetrieveAPIView):
         )
         return (
             Property.objects
-            .filter(publication_status="published")
+            .filter(publication_status="published", available_units__gt=0)
             .select_related("location", "property_type", "status")
             .prefetch_related(
                 "amenities",
@@ -155,7 +155,10 @@ class LocationListAPIView(generics.ListAPIView):
         .annotate(
             property_count=Count(
                 "properties",
-                filter=Q(properties__publication_status="published"),
+                filter=Q(
+                    properties__publication_status="published",
+                    properties__available_units__gt=0,
+                ),
             )
         )
         .order_by("-property_count")
@@ -182,7 +185,8 @@ class AmenityListAPIView(generics.ListAPIView):
 
 class VirtualTourDetailAPIView(generics.RetrieveAPIView):
     queryset = VirtualTour.objects.filter(
-        property__publication_status="published"
+        property__publication_status="published",
+        property__available_units__gt=0,
     ).prefetch_related(
         "scenes"
     )

@@ -40,6 +40,7 @@ export interface SimilarProperty {
     short_description: string;
     description: string;
     starting_price: string;
+    available_units: number;
     bedrooms: number;
     bathrooms: number;
 
@@ -89,6 +90,7 @@ export interface Property {
     description: string;
 
     starting_price: string;
+    available_units: number;
 
     bedrooms: number;
     bathrooms: number;

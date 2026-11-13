@@ -26,6 +26,7 @@ interface FormState {
   property_type: number | "";
   status: number | "";
   starting_price: string;
+  available_units: string;
   bedrooms: string;
   bathrooms: string;
   location: number | "";
@@ -46,6 +47,7 @@ const emptyForm: FormState = {
   property_type: "",
   status: "",
   starting_price: "",
+  available_units: "1",
   bedrooms: "",
   bathrooms: "",
   location: "",
@@ -322,6 +324,7 @@ function PropertyManagement() {
           ? property.status
           : property.status.id,
       starting_price: property.starting_price,
+      available_units: property.available_units.toString(),
       bedrooms: property.bedrooms.toString(),
       bathrooms: property.bathrooms.toString(),
       location:
@@ -405,6 +408,14 @@ function PropertyManagement() {
       return "Starting price must be greater than zero.";
     }
 
+    if (
+      form.available_units === "" ||
+      !Number.isInteger(Number(form.available_units)) ||
+      Number(form.available_units) < 0
+    ) {
+      return "Enter the available unit count, or 0 when sold out.";
+    }
+
     if (!form.bedrooms || Number(form.bedrooms) < 0) {
       return "Please enter a valid bedroom count.";
     }
@@ -427,6 +438,7 @@ function PropertyManagement() {
     property_type: Number(form.property_type),
     status: Number(form.status),
     starting_price: form.starting_price,
+    available_units: Number(form.available_units),
     bedrooms: Number(form.bedrooms),
     bathrooms: Number(form.bathrooms),
     location: Number(form.location),
@@ -770,6 +782,27 @@ function PropertyManagement() {
                   placeholder="0"
                   className={inputClass}
                 />
+              </label>
+
+              <label>
+                <span className="mb-1.5 block text-xs font-medium text-[#4A4A4A]">
+                  Available units
+                </span>
+
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.available_units}
+                  onChange={(event) =>
+                    updateForm("available_units", event.target.value)
+                  }
+                  className={inputClass}
+                />
+
+                <span className="mt-1 block text-xs leading-5 text-[#77736C]">
+                  Enter 0 when sold out; sold-out properties are hidden from the public site.
+                </span>
               </label>
 
               <label>
@@ -1650,6 +1683,12 @@ function PropertyManagement() {
                           <span>{property.bedrooms} beds</span>
 
                           <span>{property.bathrooms} baths</span>
+
+                          <span>
+                            {property.available_units === 0
+                              ? "Sold out"
+                              : `${property.available_units} units`}
+                          </span>
 
                           {property.featured && (
                             <span className="text-[#A18146]">Featured</span>

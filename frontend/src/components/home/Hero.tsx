@@ -2,6 +2,29 @@ import { useEffect, useState } from "react";
 import { getHeroSlides } from "../../services/heroService";
 import type { HeroSlide } from "../../types/hero";
 import { motion, AnimatePresence } from "motion/react";
+
+function preloadHeroImage(src: string): Promise<void> {
+    return new Promise((resolve) => {
+        const image = new Image();
+        let completed = false;
+        const finish = () => {
+            if (completed) return;
+            completed = true;
+            window.clearTimeout(timeoutId);
+            resolve();
+        };
+        const timeoutId = window.setTimeout(finish, 8_000);
+
+        image.decoding = "async";
+        image.fetchPriority = "high";
+        image.onload = finish;
+        image.onerror = finish;
+        image.src = src;
+
+        if (image.complete) finish();
+    });
+}
+
 function Hero() {
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -9,20 +32,40 @@ function Hero() {
     const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
+        let cancelled = false;
+
         const fetchSlides = async () => {
             try {
                 const data = await getHeroSlides();
-                setSlides(data);
+
+                if (data.length > 0) {
+                    await preloadHeroImage(data[0].image);
+                }
+
+                if (!cancelled) setSlides(data);
             } catch (error) {
                 console.error("Error fetching hero slides:", error);
-                setHasError(true);
+                if (!cancelled) setHasError(true);
             } finally {
-                setLoading(false);
+                if (!cancelled) setLoading(false);
             }
         };
 
-        fetchSlides(); 
+        void fetchSlides();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
+
+    useEffect(() => {
+        if (slides.length < 2) return;
+
+        const nextSlide = slides[(currentSlide + 1) % slides.length];
+        const image = new Image();
+        image.decoding = "async";
+        image.src = nextSlide.image;
+    }, [currentSlide, slides]);
 
     useEffect(() => {
         if (slides.length === 0) return;
@@ -36,8 +79,14 @@ function Hero() {
 
     if (loading) {
         return (
-            <section className="flex h-screen items-center justify-center">
-                <p>Loading...</p>
+            <section className="relative flex h-screen items-center justify-center overflow-hidden bg-[#18352F] text-white">
+                <div
+                    aria-hidden="true"
+                    className="absolute inset-0 animate-pulse bg-gradient-to-br from-[#18352F] via-[#244E45] to-[#18352F]"
+                />
+                <p role="status" className="relative z-10 text-sm tracking-wide text-white/80">
+                    Loading featured homes…
+                </p>
             </section>
         );
     }
@@ -54,7 +103,7 @@ function Hero() {
     const slide = slides[currentSlide];
 
     return (
-        <section className="group relative h-screen overflow-hidden">
+        <section className="group relative h-screen overflow-hidden bg-[#18352F]">
             {/* Background Image */}
             <AnimatePresence mode="sync">
                 <motion.div
@@ -72,6 +121,9 @@ function Hero() {
                     <motion.img
                         src={slide.image}
                         alt={slide.title}
+                        loading="eager"
+                        decoding="async"
+                        fetchPriority="high"
                         className="absolute inset-0 h-full w-full object-cover object-[center_60%]"
                         initial={{ scale: 1 }}
                         animate={{ scale: 1.08 }}
