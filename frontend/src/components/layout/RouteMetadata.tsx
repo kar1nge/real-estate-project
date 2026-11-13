@@ -27,6 +27,10 @@ const pageMetadata: Record<string, { title: string; description: string }> = {
     title: "Property Inquiry | NduKaWa Properties",
     description: "Send a property inquiry to the NduKaWa Properties team.",
   },
+  "/book-site-visit": {
+    title: "Book a Property Viewing | NduKaWa Properties",
+    description: "Choose an available property viewing time with NduKaWa Properties.",
+  },
   "/privacy": {
     title: "Privacy Policy | NduKaWa Properties",
     description: "Read the NduKaWa Properties privacy policy.",
@@ -49,14 +53,15 @@ function setMeta(attribute: "name" | "property", key: string, content: string) {
 
 export default function RouteMetadata() {
   const { pathname } = useLocation();
-  const slug = pathname.match(/^\/properties\/([^/]+)/)?.[1];
+  const normalizedPath = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
+  const slug = normalizedPath.match(/^\/properties\/([^/]+)$/)?.[1];
 
   useEffect(() => {
     let active = true;
-    const isCms = pathname.startsWith("/manage") || pathname.startsWith("/activate/");
-    const isPropertyDetails = pathname.startsWith("/properties/");
-    const isNotFound = !pageMetadata[pathname] && !isPropertyDetails && !isCms;
-    const metadata = pageMetadata[pathname] ?? (isCms
+    const isCms = normalizedPath.startsWith("/manage") || normalizedPath.startsWith("/activate/");
+    const isPropertyDetails = Boolean(slug);
+    const isNotFound = !pageMetadata[normalizedPath] && !isPropertyDetails && !isCms;
+    const metadata = pageMetadata[normalizedPath] ?? (isCms
       ? {
           title: "Website Management | NduKaWa Properties",
           description: "Manage NduKaWa Properties website content.",
@@ -79,7 +84,7 @@ export default function RouteMetadata() {
     setMeta("property", "og:type", "website");
     setMeta("name", "twitter:image", new URL("/static/og-image.jpg", window.location.origin).toString());
     setMeta("name", "robots", isCms || isNotFound ? "noindex, nofollow" : "index, follow");
-    const canonicalPath = pathname.endsWith("/") ? pathname : `${pathname}/`;
+    const canonicalPath = normalizedPath === "/" ? "/" : `${normalizedPath}/`;
     let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement("link");
@@ -108,7 +113,7 @@ export default function RouteMetadata() {
       }).catch(() => undefined);
     }
     return () => { active = false; };
-  }, [pathname, slug]);
+  }, [normalizedPath, slug]);
 
   return null;
 }

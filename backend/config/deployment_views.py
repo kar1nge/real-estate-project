@@ -138,7 +138,17 @@ def sitemap_xml(request):
     from django.utils.xmlutils import SimplerXMLGenerator
     from apps.properties.models import Property
 
-    urls = ["/", "/properties/", "/about/", "/faqs/", "/contact/", "/privacy/", "/terms/"]
+    urls = [
+        "/",
+        "/properties/",
+        "/about/",
+        "/faqs/",
+        "/contact/",
+        "/inquiry/",
+        "/book-site-visit/",
+        "/privacy/",
+        "/terms/",
+    ]
     urls.extend(
         f"/properties/{slug}/"
         for slug in Property.objects.filter(
