@@ -17,7 +17,7 @@ function AnimatedImage({
 }: AnimatedImageProps) {
   return (
     <span
-      className={`relative isolate block animate-pulse overflow-hidden bg-gradient-to-br from-[#18352F] via-[#244E45] to-[#18352F] ${frameClassName}`}
+      className={`block animate-pulse overflow-hidden bg-gradient-to-br from-[#18352F] via-[#244E45] to-[#18352F] ${frameClassName}`}
     >
       <img
         {...imageProps}
