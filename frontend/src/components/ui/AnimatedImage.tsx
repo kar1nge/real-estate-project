@@ -26,7 +26,7 @@ function AnimatedImage({
     >
       <span
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-br from-[#18352F] via-[#244E45] to-[#18352F] transition-opacity duration-500 ${
+        className={`pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-[#18352F] via-[#244E45] to-[#18352F] transition-opacity duration-500 ${
           isLoaded || hasFailed ? "animate-none opacity-0" : "animate-pulse opacity-100"
         }`}
       />
@@ -44,7 +44,7 @@ function AnimatedImage({
           transitionProperty: "opacity, transform",
           transitionDuration: "700ms",
         }}
-        className={`${isLoaded ? "opacity-100" : "opacity-0"} ${className}`}
+        className={className}
       />
     </span>
   );
