@@ -41,6 +41,50 @@ def google_site_verification(request):
     )
 
 
+def properties_page_fallback():
+    """Provide crawlable property content before the React page loads."""
+    from apps.properties.models import Property
+
+    properties = (
+        Property.objects.filter(
+            publication_status="published",
+            available_units__gt=0,
+        )
+        .select_related("location", "property_type")
+        .order_by("homepage_order", "title")[:30]
+    )
+
+    listing_items = []
+    for property_obj in properties:
+        property_url = f"/properties/{escape(property_obj.slug, quote=True)}/"
+        title = escape(property_obj.title)
+        property_type = escape(property_obj.property_type.name)
+        location = escape(property_obj.location.name)
+        description = escape(
+            property_obj.short_description or property_obj.description[:200]
+        )
+        price = f"KSh {property_obj.starting_price:,.0f}"
+        units = property_obj.available_units
+        listing_items.append(
+            "<li>"
+            f'<h2><a href="{property_url}">{title}</a></h2>'
+            f"<p>{property_type} in {location} · Starting at {price}</p>"
+            f"<p>{description}</p>"
+            f'<p>{units} available {"unit" if units == 1 else "units"}</p>'
+            f'<a href="{property_url}">View {title}</a>'
+            "</li>"
+        )
+
+    return (
+        '<main aria-label="Properties for sale in Nairobi">'
+        "<h1>Properties for Sale in Nairobi</h1>"
+        "<p>Explore available homes and property opportunities from NduKaWa Properties.</p>"
+        "<section><h2>Available properties</h2>"
+        f"<ul>{''.join(listing_items)}</ul></section>"
+        "</main>"
+    )
+
+
 def frontend_index(request):
     """Serve the built React application for BrowserRouter deep links."""
     index_path = settings.FRONTEND_DIST_DIR / "index.html"
@@ -127,6 +171,13 @@ def frontend_index(request):
     if not is_known_path:
         if property_match:
             is_known_path = bool(property_obj)
+
+    if path == "/properties":
+        html = html.replace(
+            '<div id="root"></div>',
+            f'<div id="root">{properties_page_fallback()}</div>',
+            1,
+        )
 
     response = HttpResponse(html, content_type="text/html; charset=utf-8")
     if not is_known_path:
