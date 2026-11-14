@@ -7,4 +7,20 @@ Disallow: /api/
 Allow: /api/properties/
 # Keep the CMS property-management API out of crawl requests.
 Disallow: /api/properties/manage/
+# Public APIs used to render the homepage and indexable content pages.
+Allow: /api/hero/
+Allow: /api/testimonials/
+Allow: /api/statistics/
+Allow: /api/team/
+Allow: /api/faqs/
+Allow: /api/site-content/
+Allow: /api/contacts/
+# Keep management endpoints private to crawlers even when their API is allowed.
+Disallow: /api/hero/manage/
+Disallow: /api/testimonials/manage/
+Disallow: /api/statistics/manage/
+Disallow: /api/team/manage/
+Disallow: /api/faqs/manage/
+Disallow: /api/site-content/manage/
+Disallow: /api/contacts/manage/
 Disallow: /admin/
