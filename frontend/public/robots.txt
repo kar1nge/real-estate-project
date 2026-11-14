@@ -3,4 +3,8 @@ Allow: /
 Disallow: /manage
 Disallow: /activate/
 Disallow: /api/
+# Public property data is needed to render the listings for search crawlers.
+Allow: /api/properties/
+# Keep the CMS property-management API out of crawl requests.
+Disallow: /api/properties/manage/
 Disallow: /admin/
